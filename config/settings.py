@@ -142,8 +142,8 @@ MESSAGE_TAGS = {
 # Users settings
 
 AUTH_USER_MODEL = "users.CustomUser"
-LOGIN_REDIRECT_URL = ""
-LOGOUT_REDIRECT_URL = ""
+LOGIN_REDIRECT_URL = "reports:home"
+LOGOUT_REDIRECT_URL = "reports:home"
 LOGIN_URL = "users:login"
 
 
