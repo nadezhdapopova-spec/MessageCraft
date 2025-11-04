@@ -48,7 +48,7 @@
                         <td class="text-center">{{ c.fail_count }}</td>
                         <td class="text-center">
                             {% if c.total_attempts %}
-                                {{ c.success_count|floatformat:1|divisibleby:c.total_attempts }}%
+                                {%  widthratio c.success_count c.total_attempts 100 %}%
                             {% else %}
                                 0%
                             {% endif %}

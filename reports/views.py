@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from campaigns.models import Campaign
 from clients.models import Client
@@ -5,7 +6,7 @@ from attempts.models import Attempt
 from django.views.generic import TemplateView, ListView
 
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     """Главная страница (дашборд): общая статистика по сервису"""
     template_name = "reports/home.html"
 
@@ -24,12 +25,13 @@ def get_context_data(self, **kwargs):
     return context
 
 
-class CampaignReportView(ListView):
+class CampaignReportView(LoginRequiredMixin, ListView):
     """Страница отчётов по рассылкам:количество попыток, процент успеха, владелец"""
     model = Campaign
     template_name = "reports/campaign_report.html"
     context_object_name = "reports"
     paginate_by = 10
+    login_url = "users:login"
 
 
     def get_queryset(self):
