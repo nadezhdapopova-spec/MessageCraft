@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+{% include "reports/includes/banner_home_page.html" %}
+<div class="container mt-5">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 mb-3">
+                <h3>{{ total_campaigns }}</h3>
+                <p>Всего рассылок</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 mb-3">
+                <h3>{{ active_campaigns }}</h3>
+                <p>Активных рассылок</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 mb-3">
+                <h3>{{ unique_clients }}</h3>
+                <p>Уникальных получателей</p>
+            </div>
+        </div>
+    </div>
+
+  <div class="row text-center mt-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3 bg-light">
+        <h4>{{ total_attempts }}</h4>
+        <p>Всего попыток отправки</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3 bg-success text-white">
+        <h4>{{ successful_attempts }}</h4>
+        <p>Успешных</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3 bg-danger text-white">
+        <h4>{{ failed_attempts }}</h4>
+        <p>Неуспешных</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'reports:campaign_report' %}" class="btn btn-primary">Посмотреть отчёты по рассылкам</a>
+  </div>
+</div>
+{% endblock %}
