@@ -7,6 +7,7 @@ from django.http import Http404
 
 from clients.models import Client
 
+
 CACHE_TIMEOUT = 60 * 15
 
 
@@ -24,7 +25,7 @@ def get_visible_clients_for_user(user):
         return Client.objects.none()
     if is_moderator(user):
         return Client.objects.select_related("owner").order_by("owner")
-    return Client.objects.filter(owner=user).select_related("owner")
+    return Client.objects.filter(owner=user)
 
 
 def get_cached_clients(user, timeout=CACHE_TIMEOUT):
@@ -101,8 +102,9 @@ def check_user_can_edit_client(user, client):
 
 def check_user_can_delete_client(user, client):
     """Проверяет, имеет ли пользователь право удалить карточку получателя рассылки"""
-    if client.owner != user and not user.is_superuser:
-        raise PermissionDenied("Вы не можете удалить чужую карточку получателя рассылки")
+    if user.is_superuser or client.owner == user:
+        return
+    raise PermissionDenied("Вы не можете удалить чужую карточку получателя рассылки")
 
 
 def search_clients(query: str, cache_timeout: int = CACHE_TIMEOUT) -> QuerySet:
@@ -122,7 +124,8 @@ def search_clients(query: str, cache_timeout: int = CACHE_TIMEOUT) -> QuerySet:
     q_objects = Q()
     for word in keywords:
         q_objects &= (Q(email__icontains=word) |
-                      Q(full_name__icontains=word))
+                      Q(full_name__icontains=word) |
+                      Q(comment__icontains=word))
 
     queryset = Client.objects.filter(q_objects)
 

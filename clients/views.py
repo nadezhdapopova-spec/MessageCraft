@@ -9,7 +9,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Client
 from .forms import ClientForm
 from .services.clients_services import get_cached_clients, can_user_view_client, invalidate_client_cache, \
-    check_user_can_create_client, check_user_can_edit_client, is_moderator, check_user_can_delete_client, search_clients
+    check_user_can_create_client, check_user_can_edit_client, check_user_can_delete_client, search_clients
 
 
 class ClientListView(LoginRequiredMixin, ListView):
@@ -100,6 +100,13 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return self._cached_object
 
 
+    def form_valid(self, form):
+        """После успешного сохранения формы сбрасываем кэш"""
+        response = super().form_valid(form)
+        invalidate_client_cache(self.request.user)
+        return response
+
+
     def handle_no_permission(self):
         """Если пользователь не авторизован, перенаправляет на страницу авторизации"""
         if not self.request.user.is_authenticated:
@@ -119,11 +126,20 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
     context_object_name = "client"
     success_url = reverse_lazy("clients:clients_list")
 
+
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
         product = super().get_object(queryset)
         check_user_can_delete_client(self.request.user, product)
         return product
+
+
+    def delete(self, request, *args, **kwargs):
+        """После удаления сбрасывает кэш клиентов"""
+        self.object = self.get_object()
+        response = super().delete(request, *args, **kwargs)
+        invalidate_client_cache(request.user)
+        return response
 
 
     def handle_no_permission(self):
