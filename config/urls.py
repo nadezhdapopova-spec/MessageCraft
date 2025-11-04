@@ -5,10 +5,11 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 
 urlpatterns = [
-    # path('', RedirectView.as_view(url="/reports/home/", permanent=False)),
+    path('', RedirectView.as_view(url="/reports/home/", permanent=False)),
     path("admin/", admin.site.urls),
     path("users/", include("users.urls", namespace="users")),
     path("reports/", include("reports.urls", namespace="reports")),
+    path("clients/", include("clients.urls", namespace="clients")),
 ]
 
 if settings.DEBUG:

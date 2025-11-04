@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 
     "users",
     "reports",
+    "clients",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
