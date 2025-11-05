@@ -136,7 +136,7 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 
 
     def delete(self, request, *args, **kwargs):
-        """После удаления сбрасывает кэш клиентов"""
+        """После удаления сбрасывает кэш сообщения"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
         invalidate_mail_cache(request.user)
