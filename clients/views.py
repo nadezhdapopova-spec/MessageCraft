@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
@@ -57,7 +57,7 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
 
 
     def get_context_data(self, **kwargs):
-        """Определяет в контексте с объект получателя рассылки"""
+        """Определяет в контексте объект получателя рассылки"""
         context = super().get_context_data(**kwargs)
         context["obj"] = None
         return context
@@ -86,7 +86,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
 
     def get_context_data(self, **kwargs):
-        """Возвращает контекст с объектом получателя рассылки"""
+        """Возвращает контекст объект получателя рассылки"""
         context = super().get_context_data(**kwargs)
         context["obj"] = self.object
         return context
@@ -101,7 +101,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
 
     def form_valid(self, form):
-        """После успешного сохранения формы сбрасываем кэш"""
+        """После успешного сохранения формы сбрасывает кэш"""
         response = super().form_valid(form)
         invalidate_client_cache(self.request.user)
         return response
@@ -129,9 +129,9 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
-        product = super().get_object(queryset)
-        check_user_can_delete_client(self.request.user, product)
-        return product
+        client = super().get_object(queryset)
+        check_user_can_delete_client(self.request.user, client)
+        return client
 
 
     def delete(self, request, *args, **kwargs):
@@ -143,7 +143,10 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
 
 
     def handle_no_permission(self):
-        """Если пользователь не авторизован, возвращает HTTP-ответ об отстутсвии прав для удаления товара"""
+        """
+        Если пользователь не авторизован, возвращает HTTP-ответ об отстутсвии прав
+        для удаления карточки получателя рассылки
+        """
         if not self.request.user.is_authenticated:
             return redirect("users:login")
         raise PermissionDenied("У вас нет прав для удаления карточки")

@@ -10,7 +10,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=100, blank=True, null=True, help_text="Необязательное поле")
     last_name = models.CharField(max_length=100, blank=True, null=True, help_text="Необязательное поле")
     phone_number = PhoneNumberField(region='RU', blank=True, null=True, verbose_name="Номер телефона", help_text="Необязательное поле")
-    avatar = models.ImageField(upload_to="users/avatars/", blank=True, null=True, verbose_name="Аватар", default="products/images/default.png")
+    avatar = models.ImageField(upload_to="users/avatars/", blank=True, null=True, verbose_name="Аватар", default="users/images/default.png")
     country = CountryField(blank_label="Выберите страну", default="RU", verbose_name="Страна")
     is_blocked = models.BooleanField(default=False, verbose_name="заблокирован")
 

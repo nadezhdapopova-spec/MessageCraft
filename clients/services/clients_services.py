@@ -109,8 +109,8 @@ def check_user_can_delete_client(user, client):
 
 def search_clients(query: str, cache_timeout: int = CACHE_TIMEOUT) -> QuerySet:
     """
-    Возвращает QuerySet товаров, соответствующих поисковому запросу.
-    Разбивает строку на слова и ищет их в name, brief_description и description.
+    Возвращает QuerySet клиентов, соответствующих поисковому запросу.
+    Разбивает строку на слова и ищет их в email, ФИО и комментарии.
     """
     if not query:
         return Client.objects.none()

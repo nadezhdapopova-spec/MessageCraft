@@ -19,10 +19,10 @@
                             <p class="card-text text-justify">{{ client.comment }}</p>
                         </div>
 
-                        {% if user == obj.owner %}
+                        {% if user == client.owner %}
                             <div class="d-flex justify-content-center gap-3 mt-2 text-center">
-                                <a href="{% url 'clients:client_update' pk=product.pk %}" class="btn-link btn-blue mt-4">Редактировать</a>
-                                <a href="{% url 'clients:client_delete' pk=product.pk %}" class="btn-link btn-red mt-4">Удалить</a>
+                                <a href="{% url 'clients:client_update' pk=client.pk %}" class="btn-link btn-blue mt-4">Редактировать</a>
+                                <a href="{% url 'clients:client_delete' pk=client.pk %}" class="btn-link btn-red mt-4">Удалить</a>
                                 <a href="{% url 'clients:clients_list' %}" class="btn-link btn-green mt-4">Назад</a>
                             </div>
                         {% else %}
@@ -31,7 +31,7 @@
                             </div>
                         {% endif %}
                         <div class="product-updated text-end">
-                            <small class="text-muted">Последнее обновление: {{ product.updated_at|date:"j b Y G:i" }}</small>
+                            <small class="text-muted">Последнее обновление: {{ client.updated_at|date:"j b Y G:i" }}</small>
                         </div>
                     </div>
                 </div>
