@@ -25,7 +25,7 @@
     <div class="text-center flex-lg-grow-1 mt-4 mt-lg-0">
         <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">Храните, делитесь и продавайте</p>
         <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">код с лёгкостью</p>
-        <a href="{% if user.is_authenticated %}{% url 'catalog:product_create' %}{% else %}{% url 'users:login' %}{% endif %}"
+        <a href="{% if user.is_authenticated %}{% url 'campaigns:campaign_create' %}{% else %}{% url 'users:login' %}{% endif %}"
             class="btn btn-buy btn-lg rounded-lg px-4 py-2 shadow-lg cta-btn animate-fade delay-6 mt-3">
             Создать товар
         </a>
