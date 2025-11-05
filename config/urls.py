@@ -11,6 +11,7 @@ urlpatterns = [
     path("reports/", include("reports.urls", namespace="reports")),
     path("clients/", include("clients.urls", namespace="clients")),
     path("mailings/", include("mailings.urls", namespace="mailings")),
+    path("campaigns/", include("campaigns.urls", namespace="campaigns")),
 ]
 
 if settings.DEBUG:

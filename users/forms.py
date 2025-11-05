@@ -48,19 +48,16 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = [
-            "email", "first_name", "last_name", "username",
-            "country", "phone_number", "avatar", "password1", "password2"
+            "first_name", "last_name", "username",
+            "country", "phone_number", "avatar",
         ]
         widgets = {
-            "email": forms.TextInput(attrs={"class": "form-control"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "country": forms.Select(attrs={"class": "form-select"}),
             "phone_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "+7 999 123 45 67"}),
             "avatar": CustomClearableFileInput(attrs={"class": "form-control"}),
-            "password1": forms.PasswordInput(attrs={"class": "form-control"}),
-            "password2": forms.PasswordInput(attrs={"class": "form-control"}),
         }
 
 
