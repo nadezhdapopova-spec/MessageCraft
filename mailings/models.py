@@ -4,16 +4,16 @@ from django.db.models import SET_NULL
 from users.models import CustomUser
 
 
-class Client(models.Model):
-    """Модель получателя рассылки"""
-    email = models.EmailField(unique=True, verbose_name="Email")
-    full_name = models.CharField(max_length=255, verbose_name="ФИО")
-    comment = models.TextField(max_length=500, blank=True, null=True, verbose_name="Комментарий",)
+class Mailing(models.Model):
+    """Модель сообщения"""
+    subject = models.CharField(max_length=255, verbose_name="Тема письма")
+    body = models.TextField(verbose_name="Текст письма")
+    is_html = models.BooleanField(default=False, verbose_name="HTML формат")
     owner = models.ForeignKey(CustomUser,
                               on_delete=SET_NULL,
                               null=True,
                               blank=True,
-                              related_name="clients",
+                              related_name="mailings",
                               verbose_name="Автор")
     created_at = models.DateTimeField(auto_now_add=True,
                                       verbose_name="Дата создания")
@@ -22,10 +22,10 @@ class Client(models.Model):
 
 
     def __str__(self):
-        return f"{self.full_name} <{self.email}>"
+        return self.subject
 
 
     class Meta:
-        verbose_name = "Получатель рассылки"
-        verbose_name_plural = "Получатели рассылки"
-        ordering = ["owner",]
+        verbose_name = "Cообщение"
+        verbose_name_plural = "Cообщения"
+        ordering = ["-created_at",]
