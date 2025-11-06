@@ -2,14 +2,14 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 
 
-def is_moderator(user):
+def is_manager(user):
     """Проверяет, состоит ли пользователь в группе модераторов"""
-    return user.is_superuser or user.groups.filter(name="moderator").exists()
+    return user.is_superuser or user.groups.filter(name="manager").exists()
 
 
 def check_user_can_create(user, entity_name="объект"):
     """Запрещает модераторам создавать сущности"""
-    if is_moderator(user) and not user.is_superuser:
+    if is_manager(user) and not user.is_superuser:
         raise PermissionDenied(f"Модераторам запрещено создавать {entity_name}")
 
 
@@ -31,5 +31,5 @@ def can_user_view(user, obj):
     """Проверяет доступ к карточке клиента"""
     if not user.is_authenticated:
         raise Http404("Информация недоступна")
-    if not is_moderator(user) and obj.owner != user:
+    if not is_manager(user) and obj.owner != user:
         raise Http404("Информация недоступна")

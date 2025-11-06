@@ -2,7 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 
 from campaigns.models import Campaign
-from .permissions import is_moderator
+from .permissions import is_manager
 from .cache_utils import cache, CACHE_TIMEOUT, safe_delete_pattern
 
 
@@ -13,7 +13,7 @@ def get_visible_objects_for_user(user, model: type[Model]):
 
     if not user.is_authenticated:
         return model.objects.none()
-    if is_moderator(user):
+    if is_manager(user):
         return model.objects.select_related("owner").order_by("owner")
     return model.objects.filter(owner=user)
 
@@ -23,7 +23,7 @@ def get_cached_objects(user, model: type[Model], timeout=CACHE_TIMEOUT):
     app_name = model._meta.app_label
 
     user_type = (
-        "moderator" if is_moderator(user)
+        "manager" if is_manager(user)
         else "owner" if user.is_authenticated
         else "anon"
     )
@@ -41,9 +41,9 @@ def get_cached_objects(user, model: type[Model], timeout=CACHE_TIMEOUT):
 
 def invalidate_obj_cache(user, app_name):
     """Сбрасывает кэш клиентов"""
-    user_types = ["anon", "owner", "moderator"]
+    user_types = ["anon", "owner", "manager"]
     if user and user.is_authenticated:
-        if is_moderator(user):
+        if is_manager(user):
             for t in user_types:
                 safe_delete_pattern(f"{app_name}_user_{t}_*")
         else:

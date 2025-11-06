@@ -10,6 +10,7 @@ class Campaign(models.Model):
         ("CREATED", "Создана"),
         ("RUNNING", "Запущена"),
         ("FINISHED", "Завершена"),
+        ("DISABLED", "Отключена")
     ]
 
     name = models.CharField(max_length=255, verbose_name="Название рассылки")
@@ -21,9 +22,19 @@ class Campaign(models.Model):
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, verbose_name="Автор")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
+
+
+    class Meta:
+        verbose_name = "рассылка"
+        verbose_name_plural = "рассылки"
+        ordering = ["created_at", ]
+        permissions = [
+            ("can_disable_campaigns", "Может отключать рассылки"),
+        ]
 
 
 class Attempt(models.Model):

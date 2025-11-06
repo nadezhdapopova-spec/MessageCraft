@@ -65,3 +65,16 @@ def check_user_can_send_campaign(user, campaign):
     if user.is_superuser or campaign.owner == user:
         return
     raise PermissionDenied("Вы не можете запустить чужую рассылку")
+
+
+def disable_campaign(request_user, campaign):
+    """Отключает рассылку, если у пользователя есть разрешение"""
+    if not (
+        request_user.is_superuser
+        or request_user.has_perm("campaigns.can_disable_campaigns")
+    ):
+        raise PermissionDenied("У вас нет прав для отключения рассылок")
+
+    campaign.status = "DISABLED"
+    campaign.is_active = False
+    campaign.save()

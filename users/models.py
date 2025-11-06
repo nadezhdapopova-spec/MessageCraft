@@ -12,7 +12,6 @@ class CustomUser(AbstractUser):
     phone_number = PhoneNumberField(region='RU', blank=True, null=True, verbose_name="Номер телефона", help_text="Необязательное поле")
     avatar = models.ImageField(upload_to="users/avatars/", blank=True, null=True, verbose_name="Аватар", default="users/images/default.png")
     country = CountryField(blank_label="Выберите страну", default="RU", verbose_name="Страна")
-    is_blocked = models.BooleanField(default=False, verbose_name="заблокирован")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username",]
@@ -26,3 +25,6 @@ class CustomUser(AbstractUser):
         verbose_name = "пользователь"
         verbose_name_plural = "пользователи"
         ordering = ["email",]
+        permissions = [
+            ("can_block_users", "Может блокировать пользователей"),
+        ]

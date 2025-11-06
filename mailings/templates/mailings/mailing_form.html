@@ -34,7 +34,7 @@
                             </div>
                         {% endif %}
 
-                        {% if is_moderator and not user.is_superuser%}
+                        {% if is_manager and not user.is_superuser%}
                             <p class="text-center mt-4 text-warning">
                                 Модераторам запрещено создавать и редактировать сообщения
                             </p>
