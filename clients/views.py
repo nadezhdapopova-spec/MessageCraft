@@ -6,10 +6,12 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
+from common.permissions import check_user_can_create, check_user_can_edit, check_user_can_delete, can_user_view
+from common.search_utils import search_objects
+from common.user_utils import get_cached_objects, invalidate_obj_cache
 from .models import Client
 from .forms import ClientForm
-from .services.clients_services import get_cached_clients, can_user_view_client, invalidate_client_cache, \
-    check_user_can_create_client, check_user_can_edit_client, check_user_can_delete_client, search_clients
 
 
 class ClientListView(LoginRequiredMixin, ListView):
@@ -29,7 +31,7 @@ class ClientListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Возвращает список получателей рассылок с учётом прав пользователя"""
-        return get_cached_clients(self.request.user)
+        return get_cached_objects(self.request.user, self.model, self.context_object_name)
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
@@ -43,7 +45,7 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         """Показывает карточку получателя рассылки, если пользователь имеет права на просмотр"""
         client = super().get_object(queryset)
-        can_user_view_client(self.request.user, client)
+        can_user_view(self.request.user, client)
         return client
 
 
@@ -67,13 +69,13 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         """Присваивает текущего авторизованного пользователя как автора карточки получателя рассылки"""
         form.instance.owner = self.request.user
         response = super().form_valid(form)
-        invalidate_client_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
     def dispatch(self, request, *args, **kwargs):
         """Запрещает модераторам создавать карточки получателей рассылки"""
-        check_user_can_create_client(request.user)
+        check_user_can_create(request.user, "карточки получателей рассылки")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -96,14 +98,14 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         """Возвращает объект только если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
-            check_user_can_edit_client(self.request.user, self._cached_object)
+            check_user_can_edit(self.request.user, self._cached_object, "карточку получателя рассылки")
         return self._cached_object
 
 
     def form_valid(self, form):
         """После успешного сохранения формы сбрасывает кэш"""
         response = super().form_valid(form)
-        invalidate_client_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
@@ -130,7 +132,7 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
         client = super().get_object(queryset)
-        check_user_can_delete_client(self.request.user, client)
+        check_user_can_delete(self.request.user, client, "карточку получателя рассылки")
         return client
 
 
@@ -138,7 +140,7 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
         """После удаления сбрасывает кэш клиентов"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
-        invalidate_client_cache(request.user)
+        invalidate_obj_cache(request.user, self.model._meta.app_label)
         return response
 
 
@@ -155,7 +157,7 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
 def client_search_view(request):
     """Осуществляет поисковый запрос получателя рассылки"""
     query = request.GET.get("q", "").strip()
-    clients = search_clients(query)
+    clients = search_objects(query, Client)
 
     paginator = Paginator(clients, 10)
     page_number = request.GET.get("page")

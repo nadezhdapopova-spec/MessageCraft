@@ -7,10 +7,12 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
+from common.permissions import can_user_view, check_user_can_create, check_user_can_edit, check_user_can_delete
+from common.search_utils import search_objects
+from common.user_utils import get_cached_objects, invalidate_obj_cache
 from .models import Mailing
 from .forms import MailingForm
-from .services.mailings_services import get_cached_mailings, can_user_view_mail, check_user_can_create_mail, \
-    invalidate_mail_cache, check_user_can_edit_mail, check_user_can_delete_mail, search_mailings
 
 
 class MailingListView(LoginRequiredMixin, ListView):
@@ -30,7 +32,7 @@ class MailingListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Возвращает список сообщений с учётом прав пользователя"""
-        return get_cached_mailings(self.request.user)
+        return get_cached_objects(self.request.user, self.model, self.context_object_name)
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
@@ -44,7 +46,7 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         """Показывает сообщение, если пользователь имеет права на просмотр"""
         mail = super().get_object(queryset)
-        can_user_view_mail(self.request.user, mail)
+        can_user_view(self.request.user, mail)
         return mail
 
 
@@ -68,13 +70,13 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         """Присваивает текущего авторизованного пользователя как автора сообщения"""
         form.instance.owner = self.request.user
         response = super().form_valid(form)
-        invalidate_mail_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
     def dispatch(self, request, *args, **kwargs):
         """Запрещает модераторам создавать сообщения"""
-        check_user_can_create_mail(request.user)
+        check_user_can_create(request.user, "сообщения")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -97,14 +99,14 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         """Возвращает объект только если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
-            check_user_can_edit_mail(self.request.user, self._cached_object)
+            check_user_can_edit(self.request.user, self._cached_object)
         return self._cached_object
 
 
     def form_valid(self, form):
         """После успешного сохранения формы сбрасывает кэш"""
         response = super().form_valid(form)
-        invalidate_mail_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
@@ -131,7 +133,7 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
         mail = super().get_object(queryset)
-        check_user_can_delete_mail(self.request.user, mail)
+        check_user_can_delete(self.request.user, mail)
         return mail
 
 
@@ -139,7 +141,7 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
         """После удаления сбрасывает кэш сообщения"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
-        invalidate_mail_cache(request.user)
+        invalidate_obj_cache(request.user, self.model._meta.app_label)
         return response
 
 
@@ -186,7 +188,7 @@ class MailingPreviewView(LoginRequiredMixin, DetailView):
 def mailing_search_view(request):
     """Осуществляет поисковый запрос сообщения"""
     query = request.GET.get("q", "").strip()
-    clients = search_mailings(query)
+    clients = search_objects(query, Mailing)
 
     paginator = Paginator(clients, 10)
     page_number = request.GET.get("page")

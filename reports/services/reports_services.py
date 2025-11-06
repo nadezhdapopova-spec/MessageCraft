@@ -1,6 +1,5 @@
-from campaigns.models import Campaign
+from campaigns.models import Campaign, Attempt
 from clients.models import Client
-from attempts.models import Attempt
 from django.db.models import Count, Q
 
 

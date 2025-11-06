@@ -9,11 +9,12 @@ from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from common.permissions import can_user_view, check_user_can_create, check_user_can_edit, check_user_can_delete
+from common.search_utils import search_objects
+from common.user_utils import get_cached_objects, invalidate_obj_cache
 from .forms import CampaignForm
 from .models import Campaign
-from .services.campaigns_services import get_cached_campaigns, invalidate_campaign_cache, \
-    check_user_can_create_campaign, check_user_can_edit_campaign, check_user_can_delete_campaign, search_campaigns, \
-    can_user_view_campaign, send_campaign, check_user_can_send_campaign
+from .services.campaigns_services import send_campaign, check_user_can_send_campaign
 
 
 class CampaignListView(LoginRequiredMixin, ListView):
@@ -33,7 +34,7 @@ class CampaignListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Возвращает список рассылок с учётом прав пользователя"""
-        return get_cached_campaigns(self.request.user)
+        return get_cached_objects(self.request.user, self.model)
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
@@ -47,7 +48,7 @@ class CampaignDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         """Показывает рассылку, если пользователь имеет права на просмотр"""
         campaign = super().get_object(queryset)
-        can_user_view_campaign(self.request.user, campaign)
+        can_user_view(self.request.user, campaign)
         return campaign
 
 
@@ -81,13 +82,13 @@ class CampaignCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         form.instance.status = "CREATED"
         response = super().form_valid(form)
-        invalidate_campaign_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
     def dispatch(self, request, *args, **kwargs):
         """Запрещает модераторам создавать рассылки"""
-        check_user_can_create_campaign(request.user)
+        check_user_can_create(request.user)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -110,7 +111,7 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
         """Возвращает объект только если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
-            check_user_can_edit_campaign(self.request.user, self._cached_object)
+            check_user_can_edit(self.request.user, self._cached_object)
         return self._cached_object
 
 
@@ -118,7 +119,7 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
         """После успешного сохранения формы сбрасывает кэш"""
         form.instance.status = "CREATED"
         response = super().form_valid(form)
-        invalidate_campaign_cache(self.request.user)
+        invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         return response
 
 
@@ -145,7 +146,7 @@ class CampaignDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
         campaign = super().get_object(queryset)
-        check_user_can_delete_campaign(self.request.user, campaign)
+        check_user_can_delete(self.request.user, campaign)
         return campaign
 
 
@@ -153,7 +154,7 @@ class CampaignDeleteView(LoginRequiredMixin, DeleteView):
         """После удаления сбрасывает кэш рассылки"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
-        invalidate_campaign_cache(request.user)
+        invalidate_obj_cache(request.user, self.model._meta.app_label)
         return response
 
 
@@ -178,7 +179,7 @@ class CampaignSendView(LoginRequiredMixin, View):
 def campaign_search_view(request):
     """Осуществляет поисковый запрос рассылки"""
     query = request.GET.get("q", "").strip()
-    clients = search_campaigns(query)
+    clients = search_objects(query, Campaign)
 
     paginator = Paginator(clients, 10)
     page_number = request.GET.get("page")
