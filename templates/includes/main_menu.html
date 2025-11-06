@@ -1,39 +1,50 @@
 <div class="box-shadow header d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3">
     <h5 class="my-0 font-weight-normal title">
-{#        <img src="/static/images/icons/SkyStore.png" alt="Skystore logo" width="24" height="24" class="me-2">#}
+        <img src="/static/images/icons/logo.jpg" alt="MessageCraft logo" width="30" height="30" class="me-2">
         MessageCraft</h5>
     <button class="nav-toggle d-md-none ms-auto" onclick="toggleMenu()">☰</button>
 
     <div class="d-flex align-items-center ms-md-5 w-100">
         <nav class="nav-container">
             <ul class="nav-menu">
-                <li><a class="nav-link" href="#">
+                <li><a class="nav-link" href="{% url "reports:home" %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                         <path d="M6.5 14.5v-5h3v5a1 1 0 0 0 1 1h2.5v-7h1L8 1 0 8.5h1v7H3a1 1 0 0 0 1-1z"/>
                     </svg>
                     Главная</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
-                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
-                            <path d="M1 3a1 1 0 0 1 1-1h4l2 2h6a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3zm1 0v9h12V5H7L5 3H2z"/>
-                        </svg>
-                        Категории товаров</a>
-                    <ul class="dropdown-menu">
-                        {% for category in global_categories %}
-                            <li><a class="dropdown-item" href="#">...</a></li>
-                        {% endfor %}
-                        <li><a class="dropdown-item" href="#">Все товары</a></li>
-                    </ul>
-                </li>
+                {% if user.is_authenticated %}
+{#                    {% if user.is_moderator %}#}
+{#                        <li><a class="nav-link" href="#">#}
+{#                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">#}
+{#                                <path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/>#}
+{#                            </svg>#}
+{#                            Admin панель</a>#}
+{#                        </li>#}
+{#                    {% endif %}#}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url "reports:home" %}" id="navbarDropdownMenuLink"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
+                                <path d="M1 3a1 1 0 0 1 1-1h4l2 2h6a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3zm1 0v9h12V5H7L5 3H2z"/>
+                            </svg>
+                            Ваши рассылки</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Ваша рассылка</a></li>
+                            <li><a class="dropdown-item" href="#">Ваши клиенты</a></li>
+                            <li><a class="dropdown-item" href="#">Сообщения</a></li>
+                            <li><a class="dropdown-item" href="#">Личная статистика</a></li>
+                            <li><a class="dropdown-item" href="#">Персональный отчет</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
                 <li><a class="nav-link" href="#">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                         <path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/>
                     </svg>
-                    Блог</a>
+                    Статистика</a>
                 </li>
-                <li><a class="nav-link" href="#">
+                <li><a class="nav-link" href="{% url "reports:contacts" %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                         <path d="M3 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H3zm5 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-4 10v-1h8v1H4z"/>
                     </svg>

@@ -2,32 +2,33 @@
      style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
 
     <div class="text-center text-lg-start flex-lg-grow-1">
-        <h1 class="display-4 fw-bold mb-4 animate-fade lead-lg-logo">Skystore</h1>
-        <p class="lead text-gray-100 animate-fade delay-1 lead-lg">Отличное место для хранения, демонстрации и продажи ваших плагинов</p>
-        <p class="lead text-gray-100 animate-fade delay-1 lead-lg"> и примеров кода</p>
+        <h1 class="display-4 fw-bold mb-4 animate-fade lead-lg-logo">MessageCraft</h1>
+        <p class="lead text-gray-100 animate-fade delay-1 lead-lg">Управляйте вашими email-рассылками с умом</p>
+        <p class="lead text-gray-100 animate-fade delay-1 lead-lg">
+            Планируйте, анализируйте и автоматизируйте коммуникации с клиентами в один клик</p>
 
         <div class="d-flex flex-column flex-sm-row gap-3 mt-3">
             <div class="feature-card d-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-lg p-3 animate-fade delay-2">
-                <span class="fs-4 text-primary">&#128190</span>
-                <p class="mb-0 text-success">Безопасное хранение</p>
+                <span class="fs-4 text-primary">&#128190;</span>
+                <p class="mb-0 text-success">Умное планирование кампаний</p>
             </div>
             <div class="feature-card d-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-lg p-3 animate-fade delay-3">
-                <span class="fs-4 text-success">&#128161</span>
-                <p class="mb-0 text-success">Демонстрация идей</p>
+                <span class="fs-4 text-success">&#128161;</span>
+                <p class="mb-0 text-success">Реальные отчёты и аналитика</p>
             </div>
             <div class="feature-card d-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-lg p-3 animate-fade delay-4">
-                <span class="fs-4 text-warning">&#128176</span>
-                <p class="mb-0 text-success">Монетизация</p>
+                <span class="fs-4 text-warning">&#128176;</span>
+                <p class="mb-0 text-success">Экономия времени и ресурсов</p>
             </div>
         </div>
     </div>
 
     <div class="text-center flex-lg-grow-1 mt-4 mt-lg-0">
-        <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">Храните, делитесь и продавайте</p>
-        <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">код с лёгкостью</p>
+        <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">Создайте рассылку</p>
+        <p class="lead text-gray-100 fw-semibold mb-4 animate-fade delay-5 lead-lg">уже сегодня</p>
         <a href="{% if user.is_authenticated %}{% url 'campaigns:campaign_create' %}{% else %}{% url 'users:login' %}{% endif %}"
             class="btn btn-buy btn-lg rounded-lg px-4 py-2 shadow-lg cta-btn animate-fade delay-6 mt-3">
-            Создать товар
+            Создать рассылку
         </a>
     </div>
 </div>

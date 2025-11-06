@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from reports.models import Contacts
+
+
+@admin.register(Contacts)
+class ContactInfoAdmin(admin.ModelAdmin):
+    list_display = ("id", "country", "address", "email",)
+    search_fields = ("id", "email",)

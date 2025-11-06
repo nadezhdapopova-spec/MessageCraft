@@ -1,27 +1,33 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
+from django.urls import reverse_lazy
+
 from campaigns.models import Campaign, Attempt
 from clients.models import Client
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, FormView
+
+from reports.forms import FeedbackForm
+from reports.models import Contacts
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(TemplateView):
     """Главная страница (дашборд): общая статистика по сервису"""
     template_name = "reports/home.html"
 
 
-def get_context_data(self, **kwargs):
-    context = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-    context["total_campaigns"] = Campaign.objects.count()
-    context["active_campaigns"] = Campaign.objects.filter(status="RUNNING").count()
-    context["unique_clients"] = Client.objects.values("email").distinct().count()
+        context["total_campaigns"] = Campaign.objects.count()
+        context["active_campaigns"] = Campaign.objects.filter(status="RUNNING").count()
+        context["unique_clients"] = Client.objects.values("email").distinct().count()
 
-    context["total_attempts"] = Attempt.objects.count()
-    context["successful_attempts"] = Attempt.objects.filter(status="SUCCESS").count()
-    context["failed_attempts"] = Attempt.objects.filter(status="FAIL").count()
+        context["total_attempts"] = Attempt.objects.count()
+        context["successful_attempts"] = Attempt.objects.filter(status="SUCCESS").count()
+        context["failed_attempts"] = Attempt.objects.filter(status="FAIL").count()
 
-    return context
+        return context
 
 
 class CampaignReportView(LoginRequiredMixin, ListView):
@@ -57,3 +63,30 @@ class CampaignReportView(LoginRequiredMixin, ListView):
         context["current_status"] = self.request.GET.get("status", "")
         context["statuses"] = Campaign.STATUS_CHOICES
         return context
+
+
+class ContactsView(FormView):
+    """Представление для страницы Контакты"""
+    form_class = FeedbackForm
+    template_name = "reports/contacts.html"
+    success_url = reverse_lazy("reports:contacts")
+
+    def get_context_data(self, **kwargs):
+        """Добавляет последнюю сохраненную контактную информацию в контекст"""
+        context = super().get_context_data(**kwargs)
+        context["contacts"] = Contacts.objects.last()
+        return context
+
+    def form_valid(self, form):
+        """Сохраняет данные формы в базу данных, добавляет 'флеш-сообщение'"""
+        feedback = form.save()
+        messages.success(self.request, f"Спасибо, {feedback.name}! Ваше сообщение получено")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        """
+        Добавляет сообщение об ошибке, возвращает пользователя на страницу с формой
+        и показывает ошибки валидации
+        """
+        messages.error(self.request, "Пожалуйста, заполните все поля")
+        return super().form_invalid(form)
