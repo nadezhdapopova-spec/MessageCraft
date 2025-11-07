@@ -23,6 +23,12 @@ class UsersManagementView(ManagerRequiredMixin, ListView):
     paginate_by = 25
 
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_manager"] = self.request.user.groups.filter(name="manager").exists()
+        return context
+
+
 class CampaignsManagementView(ManagerRequiredMixin, ListView):
     model = Campaign
     template_name = "management_panel/campaigns_table.html"

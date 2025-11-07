@@ -1,4 +1,4 @@
-{% extends "management_panel/base_dashboard.html" %}
+{% extends "management_panel/base_management_panel.html" %}
 {% block title %}Управление пользователями{% endblock %}
 
 {% block content %}
@@ -28,7 +28,7 @@
             <td>
               {% if user.is_superuser %}<span class="badge bg-danger">Суперпользователь</span>
               {% elif user.is_staff %}<span class="badge bg-info">Администратор</span>
-              {% elif user.groups.filter(name='manager').exists %}<span class="badge bg-warning">Менеджер</span>
+              {% elif user.is_manager %}<span class="badge bg-warning">Менеджер</span>
               {% else %}<span class="badge bg-secondary">Пользователь</span>{% endif %}
             </td>
           </tr>

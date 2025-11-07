@@ -55,9 +55,9 @@
     <h4 class="text-center fw-bold mb-4">🌿 Панель менеджера</h4>
     <a href="{% url 'management_panel:users_management' %}" class="{% if request.path == '/management_panel/users/' %}active{% endif %}">👥 Пользователи</a>
     <a href="{% url 'management_panel:campaigns_management' %}" class="{% if request.path == '/management_panel/campaigns/' %}active{% endif %}">📢 Рассылки</a>
-    <a href="{% url 'reports:home' %}">📊 Общая статистика</a>
+    <a href="{% url 'reports:campaign_report' %}">📊 Отчёты по рассылкам</a>
     <hr class="text-light">
-    <a href="{% url 'logout' %}">🚪 Выйти</a>
+    <a href="{% url 'reports:home' %}">🚪 На главную страницу</a>
   </div>
 
   <!-- Content -->

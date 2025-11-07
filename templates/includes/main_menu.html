@@ -15,7 +15,7 @@
                 </li>
                 {% if user.is_authenticated %}
                     {% if perms.users.can_block_users %}
-                        <li><a class="nav-link" href="#">
+                        <li><a class="nav-link" href="{% url 'management_panel:users_management' %}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                                 <path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/>
                             </svg>
