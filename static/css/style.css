@@ -843,7 +843,7 @@ a.btn-secondary:active {
   }
 
 .chart-card {
-    background: rgba(255, 255, 255, 0.50);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(10px);

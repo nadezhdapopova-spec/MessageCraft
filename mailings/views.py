@@ -20,7 +20,7 @@ class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = "mailings/mailings_list.html"
     context_object_name = "mailings"
-    paginate_by = 30
+    paginate_by = 20
 
 
     def get_context_data(self, **kwargs):

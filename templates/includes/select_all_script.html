@@ -1,0 +1,12 @@
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const selectAll = document.getElementById("select-all");
+    if (selectAll) {
+        selectAll.addEventListener("change", function() {
+            document.querySelectorAll('input[name="campaign_ids"]').forEach(chk => {
+                chk.checked = this.checked;
+            });
+        });
+    }
+});
+</script>

@@ -20,12 +20,16 @@
                             <p class="card-text text-justify">Статус: {{ campaign.status }}</p>
                             <p class="card-text text-justify">{{ campaign.start_at }}</p>
                             <p class="card-text text-justify">{{ campaign.end_at }}</p>
-                        </div>
 
-                        <form method="post" action="{% url 'campaigns:campaign_send' campaign.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success">Отправить рассылку вручную</button>
-                        </form>
+                            {% if user == campaign.owner or user.is_staff %}
+                                <form method="post" action="{% url 'campaigns:campaign_send' campaign.pk %}" class="mt-3">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">
+                                        🚀 Запустить рассылку
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
 
                         <h3>Попытки отправки</h3>
                             <p>Всего: {{ total_attempts }}, Успешно: {{ success_count }}, Неуспешно: {{ fail_count }}</p>

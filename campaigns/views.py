@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -7,6 +8,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from common.permissions import can_user_view, check_user_can_create, check_user_can_edit, check_user_can_delete
@@ -174,6 +176,35 @@ class CampaignSendView(LoginRequiredMixin, View):
         send_campaign(campaign)
         messages.success(request, f"Рассылка '{campaign.name}' отправлена")
         return redirect("campaigns:campaign_detail", pk=pk)
+
+
+@require_POST
+@login_required
+def campaign_send_multiple(request):
+    """Представление для ручного запуска нескольких рассылок одновременно"""
+    ids = request.POST.getlist("campaign_ids")
+
+    if not ids:
+        messages.warning(request, "Не выбрано ни одной рассылки")
+        return redirect("campaigns:campaigns_list")
+
+    campaigns = Campaign.objects.filter(pk__in=ids)
+
+    sent_count = 0
+    for campaign in campaigns:
+        try:
+            check_user_can_send_campaign(request.user, campaign)
+            send_campaign(campaign)
+            sent_count += 1
+        except PermissionDenied:
+            messages.warning(request, f"Вы не можете запустить рассылку '{campaign.name}'.")
+        except Exception as e:
+            messages.error(request, f"Ошибка при запуске '{campaign.name}': {e}")
+
+    if sent_count:
+        messages.success(request, f"Запущено {sent_count} рассылок!")
+
+    return redirect("campaigns:campaigns_list")
 
 
 def campaign_search_view(request):

@@ -62,17 +62,18 @@ class CampaignReportView(LoginRequiredMixin, ListView):
         status_filter = self.request.GET.get("status")
 
         qs = (Campaign.objects.annotate(total_attempts=Count("attempts"),
-                                          success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
-                                          fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),
-                                          )
-                .select_related("owner").order_by("-created_at"))
+                                        success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
+                                        fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),
+                                        ).select_related("owner"))
 
         if not user.is_staff:
             qs = qs.filter(owner=user)
+            qs = qs.order_by("-created_at")
+        else:
+            qs = qs.order_by("owner__username", "-created_at", "name")
 
         if status_filter:
             qs = qs.filter(status=status_filter)
-
         return qs
 
 

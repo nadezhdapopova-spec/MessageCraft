@@ -1,7 +1,7 @@
 from django.urls import path
 
 from campaigns.views import CampaignListView, CampaignCreateView, CampaignUpdateView, CampaignDeleteView, \
-    CampaignDetailView, CampaignSendView, campaign_search_view
+    CampaignDetailView, CampaignSendView, campaign_search_view, campaign_send_multiple
 
 app_name = "campaigns"
 
@@ -12,5 +12,6 @@ urlpatterns = [
     path("campaign/<int:pk>/delete/", CampaignDeleteView.as_view(), name="campaign_delete"),
     path("campaign/<int:pk>/", CampaignDetailView.as_view(), name="campaign_detail"),
     path("campaign/<int:pk>/send/", CampaignSendView.as_view(), name="campaign_send"),
+    path("send-multiple/", campaign_send_multiple, name="campaign_send_multiple"),
     path("search/", campaign_search_view, name="campaign_search"),
 ]
