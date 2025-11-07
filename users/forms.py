@@ -6,7 +6,7 @@ from .models import CustomUser
 
 class CustomClearableFileInput(forms.ClearableFileInput):
     """Класс для создания кастомного поля формы для загрузки файлов"""
-    template_name = "widgets/custom_file_input.html"
+    template_name = "users/widgets/custom_file_input.html"
 
 
 class CustomUserCreationForm(UserCreationForm):

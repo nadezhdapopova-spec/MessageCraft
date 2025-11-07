@@ -30,6 +30,24 @@ class DashboardView(TemplateView):
         return context
 
 
+class UserDashboardView(LoginRequiredMixin, TemplateView):
+    """Персональная статистика пользователя"""
+    template_name = "reports/user_dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        context["total_campaigns"] = Campaign.objects.filter(owner=user).count()
+        context["active_campaigns"] = Campaign.objects.filter(owner=user, status="RUNNING").count()
+        context["unique_clients"] = Client.objects.filter(owner=user).values("email").distinct().count()
+        context["total_attempts"] = Attempt.objects.filter(campaign__owner=user).count()
+        context["successful_attempts"] = Attempt.objects.filter(campaign__owner=user, status="SUCCESS").count()
+        context["failed_attempts"] = Attempt.objects.filter(campaign__owner=user, status="FAIL").count()
+
+        return context
+
+
 class CampaignReportView(LoginRequiredMixin, ListView):
     """Страница отчётов по рассылкам:количество попыток, процент успеха, владелец"""
     # model = Campaign

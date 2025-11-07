@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "clients",
     "mailings",
     "campaigns",
+    "management_panel"
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]

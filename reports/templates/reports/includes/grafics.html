@@ -1,0 +1,75 @@
+<div class="row mt-5 mb-5 g-4 justify-content-center">
+    <h3 class="text-center display-5 fw-normal mt-5 mb-3">Статистика в графиках</h3>
+    <div class="col-lg-6">
+      <div class="chart-card glass-card p-4">
+        <canvas id="attemptsChart"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="chart-card glass-card p-4">
+        <canvas id="campaignsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-5 text-center">
+    <a href="{% url 'reports:campaign_report' %}" class="btn btn-success">Смотреть отчёты по рассылкам</a>
+  </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const attemptsCtx = document.getElementById('attemptsChart');
+  const campaignsCtx = document.getElementById('campaignsChart');
+
+  // Данные из контекста Django
+  const total = {{ total_attempts|default:"0" }};
+  const success = {{ successful_attempts|default:"0" }};
+  const fail = {{ failed_attempts|default:"0" }};
+
+  // Если данных нет — показываем нули
+  const hasData = total > 0;
+
+  new Chart(attemptsCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Успешно', 'Не успешно'],
+      datasets: [{
+        data: hasData ? [success, fail] : [1, 1],
+        backgroundColor: ['#4ade80', '#ef4444'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: {
+            size: 14,
+            family: 'Inter, sans-serif'
+          },
+          padding: 20
+        }
+      }
+    },
+      cutout: '70%',
+    }
+  });
+
+  new Chart(campaignsCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Всего', 'Активных'],
+      datasets: [{
+        data: [{{ total_campaigns|default:"0" }}, {{ active_campaigns|default:"0" }}],
+        backgroundColor: ['#60a5fa', '#34d399']
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+</script>

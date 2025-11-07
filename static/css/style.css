@@ -841,13 +841,22 @@ a.btn-secondary:active {
     backdrop-filter: blur(10px);
     transition: transform .2s ease, box-shadow .2s ease;
   }
-  .glass-card:hover {
+
+.chart-card {
+    background: rgba(255, 255, 255, 0.50);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.glass-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
   }
-  .stat-card h3, .stat-card h4 {
+.stat-card h3, .stat-card h4 {
     font-size: 2rem;
   }
-  canvas {
+canvas {
     height: 380px !important;
   }

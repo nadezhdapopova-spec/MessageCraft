@@ -3,6 +3,7 @@ from django.urls import path
 from mailings.views import MailingListView, MailingDetailView, MailingCreateView, MailingUpdateView, MailingDeleteView, \
     mailing_search_view, MailingPreviewView
 
+
 app_name = "mailings"
 
 urlpatterns = [

@@ -12,6 +12,7 @@ urlpatterns = [
     path("clients/", include("clients.urls", namespace="clients")),
     path("mailings/", include("mailings.urls", namespace="mailings")),
     path("campaigns/", include("campaigns.urls", namespace="campaigns")),
+    path("management_panel/", include("management_panel.urls", namespace="management_panel")),
 ]
 
 if settings.DEBUG:

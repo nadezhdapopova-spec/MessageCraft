@@ -32,7 +32,7 @@ class MailingListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Возвращает список сообщений с учётом прав пользователя"""
-        return get_cached_objects(self.request.user, self.model, self.context_object_name)
+        return get_cached_objects(self.request.user, self.model)
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")

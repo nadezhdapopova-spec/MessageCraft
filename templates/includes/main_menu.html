@@ -14,7 +14,7 @@
                     Главная</a>
                 </li>
                 {% if user.is_authenticated %}
-                    {% if user.is_manager %}
+                    {% if perms.users.can_block_users %}
                         <li><a class="nav-link" href="#">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                                 <path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/>
@@ -30,15 +30,17 @@
                             </svg>
                             Ваши рассылки</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Ваша рассылка</a></li>
-                            <li><a class="dropdown-item" href="#">Ваши клиенты</a></li>
-                            <li><a class="dropdown-item" href="#">Сообщения</a></li>
-                            <li><a class="dropdown-item" href="#">Личная статистика</a></li>
-                            <li><a class="dropdown-item" href="#">Персональный отчет</a></li>
+                            <li><a class="dropdown-item" href="{% url 'campaigns:campaigns_list' %}">Ваша рассылка</a></li>
+                            <li><a class="dropdown-item" href="{% url 'clients:clients_list' %}">Ваши клиенты</a></li>
+                            <li><a class="dropdown-item" href="{% url 'mailings:mailings_list' %}">Сообщения</a></li>
+{#                            {% if not perms.users.can_block_users %}#}
+                                <li><a class="dropdown-item" href="{% url 'reports:user_dashboard' %}">Личная статистика</a></li>
+{#                            {% endif %}#}
+                            <li><a class="dropdown-item" href="{% url 'reports:campaign_report' %}">Персональный отчет</a></li>
                         </ul>
                     </li>
                 {% endif %}
-                <li><a class="nav-link" href="#">
+                <li><a class="nav-link" href="{% url 'reports:home' %}#stats">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#27ae60" class="nav-icon" viewBox="0 0 16 16">
                         <path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/>
                     </svg>
