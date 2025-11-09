@@ -2,8 +2,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 
 from campaigns.models import Campaign
+
+from .cache_utils import CACHE_TIMEOUT, cache, safe_delete_pattern
 from .permissions import is_manager
-from .cache_utils import cache, CACHE_TIMEOUT, safe_delete_pattern
 
 
 def get_visible_objects_for_user(user, model: type[Model]):
@@ -22,11 +23,7 @@ def get_cached_objects(user, model: type[Model], timeout=CACHE_TIMEOUT):
     """Возвращает кэшированный список клиентов"""
     app_name = model._meta.app_label
 
-    user_type = (
-        "manager" if is_manager(user)
-        else "owner" if user.is_authenticated
-        else "anon"
-    )
+    user_type = "manager" if is_manager(user) else "owner" if user.is_authenticated else "anon"
     cache_key = f"{app_name}_user_{user_type}_{user.pk if user.is_authenticated else 'anon'}"
     queryset = cache.get(cache_key)
     if queryset is not None:

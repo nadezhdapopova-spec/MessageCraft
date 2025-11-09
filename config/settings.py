@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.apps import apps
+
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,18 +27,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "crispy_forms",
     "crispy_bootstrap5",
     "phonenumber_field",
     "django_extensions",
-
     "users",
     "reports",
     "clients",
     "mailings",
     "campaigns",
-    "management_panel"
+    "management_panel",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
@@ -57,7 +57,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates",],
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -92,16 +94,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -176,3 +178,80 @@ if CACHE_ENABLED:
             "LOCATION": os.getenv("LOCATION"),
         }
     }
+
+
+# Logging settings
+
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] [{levelname}] {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "file_django": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "django.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "file_campaigns": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "campaigns.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "file_clients": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "clients.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "file_mailings": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "mailings.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file_django"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "campaigns": {
+            "handlers": ["console", "file_campaigns"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "clients": {
+            "handlers": ["console", "file_clients"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "mailings": {
+            "handlers": ["console", "file_mailings"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

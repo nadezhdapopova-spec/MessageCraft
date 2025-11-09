@@ -2,19 +2,18 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
+from django.views.generic import FormView, ListView, TemplateView
 
-from campaigns.models import Campaign, Attempt
+from campaigns.models import Attempt, Campaign
 from clients.models import Client
-from django.views.generic import TemplateView, ListView, FormView
-
 from reports.forms import FeedbackForm
 from reports.models import Contacts
 
 
 class DashboardView(TemplateView):
     """Главная страница (дашборд): общая статистика по сервису"""
-    template_name = "reports/home.html"
 
+    template_name = "reports/home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -32,6 +31,7 @@ class DashboardView(TemplateView):
 
 class UserDashboardView(LoginRequiredMixin, TemplateView):
     """Персональная статистика пользователя"""
+
     template_name = "reports/user_dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -50,21 +50,22 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
 
 class CampaignReportView(LoginRequiredMixin, ListView):
     """Страница отчётов по рассылкам:количество попыток, процент успеха, владелец"""
+
     # model = Campaign
     template_name = "reports/campaign_report.html"
     context_object_name = "reports"
     paginate_by = 10
     login_url = "users:login"
 
-
     def get_queryset(self):
         user = self.request.user
         status_filter = self.request.GET.get("status")
 
-        qs = (Campaign.objects.annotate(total_attempts=Count("attempts"),
-                                        success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
-                                        fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),
-                                        ).select_related("owner"))
+        qs = Campaign.objects.annotate(
+            total_attempts=Count("attempts"),
+            success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
+            fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),
+        ).select_related("owner")
 
         if not user.is_staff:
             qs = qs.filter(owner=user)
@@ -76,7 +77,6 @@ class CampaignReportView(LoginRequiredMixin, ListView):
             qs = qs.filter(status=status_filter)
         return qs
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["current_status"] = self.request.GET.get("status", "")
@@ -86,6 +86,7 @@ class CampaignReportView(LoginRequiredMixin, ListView):
 
 class ContactsView(FormView):
     """Представление для страницы Контакты"""
+
     form_class = FeedbackForm
     template_name = "reports/contacts.html"
     success_url = reverse_lazy("reports:contacts")

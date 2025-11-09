@@ -1,7 +1,15 @@
 from django.urls import path
 
-from campaigns.views import CampaignListView, CampaignCreateView, CampaignUpdateView, CampaignDeleteView, \
-    CampaignDetailView, CampaignSendView, campaign_search_view, campaign_send_multiple
+from campaigns.views import (
+    CampaignCreateView,
+    CampaignDeleteView,
+    CampaignDetailView,
+    CampaignListView,
+    CampaignSendView,
+    CampaignUpdateView,
+    campaign_search_view,
+    campaign_send_multiple,
+)
 
 app_name = "campaigns"
 

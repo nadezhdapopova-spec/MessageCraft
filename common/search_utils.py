@@ -1,6 +1,8 @@
 import re
-from django.db.models import Q, Model, QuerySet
+
 from django.core.cache import cache
+from django.db.models import Model, Q, QuerySet
+
 from .cache_utils import CACHE_TIMEOUT
 
 
@@ -33,11 +35,12 @@ def search_objects(query: str, source, cache_timeout: int = CACHE_TIMEOUT):
         search_fields = ["name", "status", "message__subject", "message__body"]
     else:
         search_fields = [
-            f.name for f in model._meta.get_fields()
+            f.name
+            for f in model._meta.get_fields()
             if hasattr(f, "attname") and f.get_internal_type() in ["CharField", "TextField"]
         ]
 
-    keywords = re.findall(r'\w+', query)
+    keywords = re.findall(r"\w+", query)
     q_objects = Q()
     for word in keywords:
         sub_q = Q()

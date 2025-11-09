@@ -1,6 +1,7 @@
 from django import forms
 
 from common.permissions import is_manager
+
 from .models import Campaign
 
 
@@ -19,7 +20,6 @@ class CampaignForm(forms.ModelForm):
             "end_at": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
         }
 
-
     def __init__(self, *args, **kwargs):
         """Ограничивает список сообщений и клиентов только теми, что созданы пользователем"""
         user = kwargs.pop("user", None)
@@ -28,7 +28,6 @@ class CampaignForm(forms.ModelForm):
         if user and not is_manager(user):
             self.fields["message"].queryset = self.fields["message"].queryset.filter(owner=user)
             self.fields["recipients"].queryset = self.fields["recipients"].queryset.filter(owner=user)
-
 
     def clean(self):
         """Проверяет, что дата окончания позже даты начала"""

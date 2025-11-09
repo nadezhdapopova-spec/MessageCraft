@@ -1,6 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm
 from django.core.exceptions import ValidationError
 
 from .models import CustomUser
@@ -8,18 +7,30 @@ from .models import CustomUser
 
 class CustomClearableFileInput(forms.ClearableFileInput):
     """Класс для создания кастомного поля формы для загрузки файлов"""
+
     template_name = "users/widgets/custom_file_input.html"
 
 
 class CustomUserCreationForm(UserCreationForm):
     """Класс формы для регистрации пользователя"""
-    username = forms.CharField(max_length=150, help_text="Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.")
 
+    username = forms.CharField(
+        max_length=150, help_text="Не более 150 символов. Только буквы, цифры и символы @/./+/-/_."
+    )
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = ("email", "username", "first_name", "last_name", "country", "phone_number",
-                  "avatar", "password1", "password2")
+        fields = (
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "country",
+            "phone_number",
+            "avatar",
+            "password1",
+            "password2",
+        )
         widgets = {
             "email": forms.TextInput(attrs={"class": "form-control"}),
             "username": forms.TextInput(attrs={"class": "form-control"}),
@@ -32,7 +43,6 @@ class CustomUserCreationForm(UserCreationForm):
             "password2": forms.PasswordInput(attrs={"class": "form-control"}),
         }
 
-
     def clean_avatar(self):
         """Метод валидации поля формы 'аватар' на формат и размер файла"""
         avatar = self.cleaned_data.get("avatar")
@@ -43,6 +53,7 @@ class CustomUserCreationForm(UserCreationForm):
             raise forms.ValidationError("Файл должен быть в формате JPEG или PNG")
         valid_extensions = [".jpg", ".jpeg", ".png"]
         import os
+
         ext = os.path.splitext(avatar.name)[1].lower()
         if ext not in valid_extensions:
             raise forms.ValidationError("Недопустимое расширение файла. Используйте JPG или PNG")
@@ -54,11 +65,16 @@ class CustomUserCreationForm(UserCreationForm):
 
 class UserProfileForm(forms.ModelForm):
     """Форма для личных данных"""
+
     class Meta:
         model = CustomUser
         fields = [
-            "first_name", "last_name", "username",
-            "country", "phone_number", "avatar",
+            "first_name",
+            "last_name",
+            "username",
+            "country",
+            "phone_number",
+            "avatar",
         ]
         widgets = {
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -89,9 +105,10 @@ class CustomPasswordResetForm(PasswordResetForm):
         return email
 
     def save(self, *args, **kwargs):
-        if 'html_email_template_name' not in kwargs or kwargs['html_email_template_name'] is None:
-            kwargs['html_email_template_name'] = 'users/password_reset_email.html'
+        if "html_email_template_name" not in kwargs or kwargs["html_email_template_name"] is None:
+            kwargs["html_email_template_name"] = "users/password_reset_email.html"
         return super().save(*args, **kwargs)
+
 
 class CustomSetPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))

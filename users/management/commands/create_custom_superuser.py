@@ -1,6 +1,10 @@
-from django.core.management.base import BaseCommand
+import logging
+
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
 from django.db import IntegrityError
+
+logger = logging.getLogger("users")
 
 
 class Command(BaseCommand):
@@ -15,10 +19,13 @@ class Command(BaseCommand):
                     password="123qwe456rty",
                     first_name="Admin",
                     last_name="Admin",
-                    username="Admin"
+                    username="Admin",
                 )
-                self.stdout.write(self.style.SUCCESS("Superuser admin@sky.pro успешно создан"))
+                logger.info("Суперпользователь успешно создан")
+                self.stdout.write(self.style.SUCCESS("Суперпользователь admin@sky.pro успешно создан"))
             else:
-                self.stdout.write(self.style.WARNING("Superuser admin@sky.pro уже существует"))
+                logger.warning("Суперпользователь уже существует")
+                self.stdout.write(self.style.WARNING("Суперпользователь admin@sky.pro уже существует"))
         except IntegrityError as e:
+            logger.error(f"Ошибка создания суперпользователя: {e}")
             self.stdout.write(self.style.ERROR(f"Ошибка создания суперпользователя: {e}"))

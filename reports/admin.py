@@ -5,5 +5,13 @@ from reports.models import Contacts
 
 @admin.register(Contacts)
 class ContactInfoAdmin(admin.ModelAdmin):
-    list_display = ("id", "country", "address", "email",)
-    search_fields = ("id", "email",)
+    list_display = (
+        "id",
+        "country",
+        "address",
+        "email",
+    )
+    search_fields = (
+        "id",
+        "email",
+    )

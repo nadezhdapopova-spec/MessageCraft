@@ -1,7 +1,8 @@
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import redirect
 from django.views.generic import ListView
+
 from campaigns.models import Campaign
 from common.permissions import is_manager
 from users.models import CustomUser
@@ -9,6 +10,7 @@ from users.models import CustomUser
 
 class ManagerRequiredMixin:
     """Миксин для проверки прав менеджера"""
+
     def dispatch(self, request, *args, **kwargs):
         if not is_manager(request.user):
             messages.error(request, "У вас нет доступа к этой странице")
@@ -21,7 +23,6 @@ class UsersManagementView(ManagerRequiredMixin, ListView):
     template_name = "management_panel/users_table.html"
     context_object_name = "users"
     paginate_by = 25
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

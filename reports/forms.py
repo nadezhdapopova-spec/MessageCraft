@@ -5,6 +5,7 @@ from .models import MessageFeedback
 
 class FeedbackForm(forms.ModelForm):
     """Класс формы обратной связи"""
+
     class Meta:
         model = MessageFeedback
         fields = ["name", "email", "message"]

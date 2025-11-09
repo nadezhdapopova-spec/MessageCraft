@@ -1,4 +1,5 @@
 from django.db import models
+
 from clients.models import Client
 from mailings.models import Mailing
 from users.models import CustomUser
@@ -6,11 +7,12 @@ from users.models import CustomUser
 
 class Campaign(models.Model):
     """Модель рассылки и управления статусами"""
+
     STATUS_CHOICES = [
         ("CREATED", "Создана"),
         ("RUNNING", "Запущена"),
         ("FINISHED", "Завершена"),
-        ("DISABLED", "Отключена")
+        ("DISABLED", "Отключена"),
     ]
 
     name = models.CharField(max_length=255, verbose_name="Название рассылки")
@@ -27,11 +29,12 @@ class Campaign(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
 
-
     class Meta:
         verbose_name = "рассылка"
         verbose_name_plural = "рассылки"
-        ordering = ["created_at", ]
+        ordering = [
+            "created_at",
+        ]
         permissions = [
             ("can_disable_campaigns", "Может отключать рассылки"),
         ]
@@ -39,6 +42,7 @@ class Campaign(models.Model):
 
 class Attempt(models.Model):
     """Модель попытки отправки рассылки"""
+
     STATUS_CHOICES = [
         ("SUCCESS", "Успешно"),
         ("FAIL", "Не успешно"),

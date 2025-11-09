@@ -1,6 +1,5 @@
 from django.core.cache import cache
 
-
 CACHE_TIMEOUT = 60 * 15
 
 

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from reports.views import DashboardView, CampaignReportView, ContactsView, UserDashboardView
+from reports.views import CampaignReportView, ContactsView, DashboardView, UserDashboardView
 
 app_name = "reports"
 

@@ -1,7 +1,11 @@
+import logging
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
 from django.db import IntegrityError
+
+logger = logging.getLogger("users")
 
 
 class Command(BaseCommand):
@@ -18,16 +22,20 @@ class Command(BaseCommand):
                     last_name="Manager1",
                     username="manager1",
                     country="RU",
-                    is_staff=True
+                    is_staff=True,
                 )
 
                 group, _ = Group.objects.get_or_create(name="manager")
                 user.groups.add(group)
-
+                logger.info(f"Пользователь {user.email} успешно создан")
                 self.stdout.write(self.style.SUCCESS(f"Пользователь {user.email} успешно создан"))
+
             else:
-                self.stdout.write(self.style.WARNING(f"Пользователь уже существует"))
+                logger.warning("Пользователь уже существует")
+                self.stdout.write(self.style.WARNING("Пользователь уже существует"))
         except IntegrityError as e:
+            logger.error(f"Ошибка создания менеджера1: {e}")
             self.stderr.write(self.style.ERROR(f"Ошибка создания менеджера1: {e}"))
         except Exception as e:
+            logger.error(f"Ошибка при создании менеджера1: {e}")
             self.stderr.write(self.style.ERROR(f"Неожиданная ошибка: {e}"))

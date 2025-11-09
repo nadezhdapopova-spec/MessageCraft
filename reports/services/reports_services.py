@@ -1,6 +1,7 @@
-from campaigns.models import Campaign, Attempt
-from clients.models import Client
 from django.db.models import Count, Q
+
+from campaigns.models import Attempt, Campaign
+from clients.models import Client
 
 
 def get_dashboard_stats():
@@ -15,8 +16,7 @@ def get_dashboard_stats():
 
 def get_campaign_reports():
     return (
-        Campaign.objects
-        .annotate(
+        Campaign.objects.annotate(
             total_attempts=Count("attempts"),
             success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
             fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),

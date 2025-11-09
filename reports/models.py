@@ -3,6 +3,7 @@ from django.db import models
 
 class Contacts(models.Model):
     """Класс контактной информации"""
+
     country = models.CharField(max_length=20, verbose_name="Страна")
     address = models.CharField(max_length=150, verbose_name="Юридический адрес")
     email = models.EmailField(max_length=50, verbose_name="Адрес электронной почты")
@@ -13,11 +14,15 @@ class Contacts(models.Model):
     class Meta:
         verbose_name = "контакты"
         verbose_name_plural = "контакты"
-        ordering = ["country", "address",]
+        ordering = [
+            "country",
+            "address",
+        ]
 
 
 class MessageFeedback(models.Model):
     """Класс обратной связи пользователей"""
+
     name = models.CharField(max_length=150, verbose_name="Имя пользователя")
     email = models.EmailField(verbose_name="E-mail пользователя")
     message = models.TextField(max_length=2000, verbose_name="Сообщение пользователя")
@@ -29,4 +34,8 @@ class MessageFeedback(models.Model):
     class Meta:
         verbose_name = "обратная связь"
         verbose_name_plural = "обратная связь"
-        ordering = ["name", "email", "created_at",]
+        ordering = [
+            "name",
+            "email",
+            "created_at",
+        ]

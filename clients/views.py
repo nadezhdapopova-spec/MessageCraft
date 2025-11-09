@@ -1,26 +1,29 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from common.permissions import check_user_can_create, check_user_can_edit, check_user_can_delete, can_user_view
+from common.permissions import can_user_view, check_user_can_create, check_user_can_delete, check_user_can_edit
 from common.search_utils import search_objects
 from common.user_utils import get_cached_objects, invalidate_obj_cache
-from .models import Client
+
 from .forms import ClientForm
+from .models import Client
+
+logger = logging.getLogger("clients")
 
 
 class ClientListView(LoginRequiredMixin, ListView):
     """Представление для отображения получателей рассылок"""
+
     model = Client
     template_name = "clients/clients_list.html"
     context_object_name = "clients"
     paginate_by = 10
-
 
     def get_context_data(self, **kwargs):
         """Добавляет поиск по получателям рассылок в контекст"""
@@ -28,7 +31,6 @@ class ClientListView(LoginRequiredMixin, ListView):
         context["search_type"] = "client"
         context["query"] = self.request.GET.get("q", "")
         return context
-
 
     def get_queryset(self):
         """Возвращает список получателей рассылок с учётом прав пользователя"""
@@ -40,13 +42,12 @@ class ClientListView(LoginRequiredMixin, ListView):
         return qs.order_by("owner", "-created_at", "email")
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class ClientDetailView(LoginRequiredMixin, DetailView):
     """Представление для отображения карточки получателя рассылки"""
+
     model = Client
     template_name = "clients/client_detail.html"
     context_object_name = "client"
-
 
     def get_object(self, queryset=None):
         """Показывает карточку получателя рассылки, если пользователь имеет права на просмотр"""
@@ -57,12 +58,12 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
 
 class ClientCreateView(LoginRequiredMixin, CreateView):
     """Представление для создания карточки получателя рассылки"""
+
     model = Client
     form_class = ClientForm
     template_name = "clients/client_form.html"
     context_object_name = "client"
     success_url = reverse_lazy("clients:clients_list")
-
 
     def get_context_data(self, **kwargs):
         """Определяет в контексте объект получателя рассылки"""
@@ -70,14 +71,13 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         context["obj"] = None
         return context
 
-
     def form_valid(self, form):
         """Присваивает текущего авторизованного пользователя как автора карточки получателя рассылки"""
         form.instance.owner = self.request.user
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
+        logger.info(f"Получатель рассылки добавлен пользователем {self.request.user}")
         return response
-
 
     def dispatch(self, request, *args, **kwargs):
         """Запрещает модераторам создавать карточки получателей рассылки"""
@@ -87,18 +87,17 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
 
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
     """Представление для редактирования карточки получателя рассылки"""
+
     model = Client
     template_name = "clients/client_form.html"
     form_class = ClientForm
     context_object_name = "client"
-
 
     def get_context_data(self, **kwargs):
         """Возвращает контекст объект получателя рассылки"""
         context = super().get_context_data(**kwargs)
         context["obj"] = self.object
         return context
-
 
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — автор или суперпользователь"""
@@ -107,20 +106,21 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
             check_user_can_edit(self.request.user, self._cached_object, "карточку получателя рассылки")
         return self._cached_object
 
-
     def form_valid(self, form):
         """После успешного сохранения формы сбрасывает кэш"""
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
+        logger.info(f"Получатель рассылки {self.object.pk} обновлен пользователем {self.request.user}")
         return response
-
 
     def handle_no_permission(self):
         """Если пользователь не авторизован, перенаправляет на страницу авторизации"""
         if not self.request.user.is_authenticated:
             return redirect("users:login")
+        logger.warning(
+            f"Попытка редактирования клиента {self.object.pk} пользователем без прав доступа {self.request.user}"
+        )
         raise PermissionDenied("У вас нет прав для редактирования карточки получателя рассылки")
-
 
     def get_success_url(self):
         """При успешном редактировании карточки получателя рассылки возвращает на страницу просмотра карточки"""
@@ -129,11 +129,11 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
 class ClientDeleteView(LoginRequiredMixin, DeleteView):
     """Представление для удаления карточки получателя рассылки"""
+
     model = Client
     template_name = "clients/client_confirm_delete.html"
     context_object_name = "client"
     success_url = reverse_lazy("clients:clients_list")
-
 
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
@@ -141,14 +141,13 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
         check_user_can_delete(self.request.user, client, "карточку получателя рассылки")
         return client
 
-
     def delete(self, request, *args, **kwargs):
         """После удаления сбрасывает кэш клиентов"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
         invalidate_obj_cache(request.user, self.model._meta.app_label)
+        logger.info(f"Получатель рассылки {self.object.pk} удален пользователем {self.request.user}")
         return response
-
 
     def handle_no_permission(self):
         """
@@ -157,6 +156,7 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
         """
         if not self.request.user.is_authenticated:
             return redirect("users:login")
+        logger.warning(f"Попытка удаления клиента {self.object.pk} пользователем без прав доступа {self.request.user}")
         raise PermissionDenied("У вас нет прав для удаления карточки")
 
 

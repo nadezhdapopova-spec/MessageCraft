@@ -1,27 +1,30 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
-from django.template import Template, Context
+from django.template import Context, Template
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from common.permissions import can_user_view, check_user_can_create, check_user_can_edit, check_user_can_delete
+from common.permissions import can_user_view, check_user_can_create, check_user_can_delete, check_user_can_edit
 from common.search_utils import search_objects
 from common.user_utils import get_cached_objects, invalidate_obj_cache
-from .models import Mailing
+
 from .forms import MailingForm
+from .models import Mailing
+
+logger = logging.getLogger("mailings")
 
 
 class MailingListView(LoginRequiredMixin, ListView):
     """Представление для отображения списка сообщений"""
+
     model = Mailing
     template_name = "mailings/mailings_list.html"
     context_object_name = "mailings"
     paginate_by = 20
-
 
     def get_context_data(self, **kwargs):
         """Добавляет поиск по сообщениям в контекст"""
@@ -29,7 +32,6 @@ class MailingListView(LoginRequiredMixin, ListView):
         context["search_type"] = "mailings"
         context["query"] = self.request.GET.get("q", "")
         return context
-
 
     def get_queryset(self):
         """Возвращает список сообщений с учётом прав пользователя"""
@@ -41,13 +43,12 @@ class MailingListView(LoginRequiredMixin, ListView):
         return qs.order_by("owner", "-created_at", "subject")
 
 
-# @method_decorator(cache_page(60 * 15), name="dispatch")
 class MailingDetailView(LoginRequiredMixin, DetailView):
     """Представление для отображения сообщения"""
+
     model = Mailing
     template_name = "mailings/mailing_detail.html"
     context_object_name = "mail"
-
 
     def get_object(self, queryset=None):
         """Показывает сообщение, если пользователь имеет права на просмотр"""
@@ -58,12 +59,12 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
 
 class MailingCreateView(LoginRequiredMixin, CreateView):
     """Представление для создания сообщения"""
+
     model = Mailing
     form_class = MailingForm
     template_name = "mailings/mailing_form.html"
     context_object_name = "mail"
     success_url = reverse_lazy("mailings:mailings_list")
-
 
     def get_context_data(self, **kwargs):
         """Определяет в контексте объект сообщения"""
@@ -71,14 +72,13 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         context["obj"] = None
         return context
 
-
     def form_valid(self, form):
         """Присваивает текущего авторизованного пользователя как автора сообщения"""
         form.instance.owner = self.request.user
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
+        logger.info(f"Сообщение создано пользователем {self.request.user}")
         return response
-
 
     def dispatch(self, request, *args, **kwargs):
         """Запрещает модераторам создавать сообщения"""
@@ -88,18 +88,17 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
 class MailingUpdateView(LoginRequiredMixin, UpdateView):
     """Представление для редактирования сообщения"""
+
     model = Mailing
     template_name = "mailings/mailing_form.html"
     form_class = MailingForm
     context_object_name = "mail"
-
 
     def get_context_data(self, **kwargs):
         """Возвращает контекст объект сообщения"""
         context = super().get_context_data(**kwargs)
         context["obj"] = self.object
         return context
-
 
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — автор или суперпользователь"""
@@ -108,20 +107,21 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
             check_user_can_edit(self.request.user, self._cached_object)
         return self._cached_object
 
-
     def form_valid(self, form):
         """После успешного сохранения формы сбрасывает кэш"""
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
+        logger.info(f"Сообщение {self.object.pk} обновлено пользователем {self.request.user}")
         return response
-
 
     def handle_no_permission(self):
         """Если пользователь не авторизован, перенаправляет на страницу авторизации"""
         if not self.request.user.is_authenticated:
             return redirect("users:login")
+        logger.warning(
+            f"Попытка редактирования сообщения {self.object.pk} пользователем без прав доступа {self.request.user}"
+        )
         raise PermissionDenied("У вас нет прав для редактирования сообщения")
-
 
     def get_success_url(self):
         """При успешном редактировании сообщения возвращает на страницу просмотра сообщения"""
@@ -130,11 +130,11 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
 
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
     """Представление для удаления сообщения"""
+
     model = Mailing
     template_name = "mailings/mailing_confirm_delete.html"
     context_object_name = "mail"
     success_url = reverse_lazy("mailings:mailings_list")
-
 
     def get_object(self, queryset=None):
         """Возвращает объект только если пользователь — владелец или суперпользователь"""
@@ -142,28 +142,30 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
         check_user_can_delete(self.request.user, mail)
         return mail
 
-
     def delete(self, request, *args, **kwargs):
         """После удаления сбрасывает кэш сообщения"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
         invalidate_obj_cache(request.user, self.model._meta.app_label)
+        logger.info(f"Сообщение {self.object.pk} удалено пользователем {self.request.user}")
         return response
-
 
     def handle_no_permission(self):
         """Если пользователь не авторизован, возвращает HTTP-ответ об отстутсвии прав для удаления сообщения"""
         if not self.request.user.is_authenticated:
             return redirect("users:login")
+        logger.warning(
+            f"Попытка удаления сообщения {self.object.pk} пользователем без прав доступа {self.request.user}"
+        )
         raise PermissionDenied("У вас нет прав для удаления сообщения")
 
 
 class MailingPreviewView(LoginRequiredMixin, DetailView):
     """Предпросмотр письма перед отправкой"""
+
     model = Mailing
     template_name = "mailings/mailing_preview.html"
     context_object_name = "mail"
-
 
     def get_object(self, queryset=None):
         """Доступ только автору или суперпользователю"""
@@ -172,7 +174,6 @@ class MailingPreviewView(LoginRequiredMixin, DetailView):
         if not (user == mail.owner or user.is_superuser):
             raise PermissionDenied("У вас нет прав для просмотра предпросмотра этого письма")
         return mail
-
 
     def get_context_data(self, **kwargs):
         """Готовит рендер письма с подстановкой переменных"""
