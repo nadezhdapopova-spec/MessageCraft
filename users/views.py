@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from config.settings import BASE_DIR
 from .forms import CustomUserCreationForm, UserProfileForm, UserPasswordForm
@@ -21,25 +22,28 @@ class RegisterView(FormView):
     """Класс регистрации пользователя"""
     template_name = "users/register.html"
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy("catalog:home")
+    success_url = reverse_lazy("reports:home")
 
 
     def form_valid(self, form):
         """Сохраняет данные пользователя в базу данных, осуществляет вход пользователя в систему как авторизованного"""
         user = form.save()
         login(self.request, user)
-        self.send_welcome_email(user.email)
+        self.send_welcome_email(user)
         return super().form_valid(form)
 
 
     @staticmethod
-    def send_welcome_email(user_email):
-        """Отправляет на почту пользователя письмо об успешной регистрации на сайте"""
+    def send_welcome_email(user):
         subject = "Добро пожаловать в MessageCraft"
-        message = "Спасибо, что зарегистрировались в нашем сервисе!"
         from_email = os.getenv("EMAIL_HOST_USER")
-        recipient_list = [user_email,]
-        send_mail(subject, message, from_email, recipient_list)
+        recipient_list = [user.email,]
+
+        html_content = render_to_string("users/welcome_email.html", {"user": user})
+
+        email = EmailMultiAlternatives(subject=subject, body="", from_email=from_email, to=recipient_list)
+        email.attach_alternative(html_content, "text/html")
+        email.send()
 
 
 class AccountView(LoginRequiredMixin, TemplateView):

@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
+from django.utils import timezone
 
 from campaigns.models import Campaign, Attempt
 from config import settings
@@ -54,7 +55,7 @@ def send_scheduled_campaigns() -> None:
     Отправка всех рассылок, которые должны быть отправлены сейчас:
     для автоматической отправки по расписанию
     """
-    now = datetime.now()
+    now = timezone.now()
     campaigns = Campaign.objects.filter(status="CREATED", start_at__lte=now)
     for campaign in campaigns:
         send_campaign(campaign)

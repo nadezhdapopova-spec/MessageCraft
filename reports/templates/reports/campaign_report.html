@@ -25,7 +25,7 @@
             <tbody>
                 {% for c in reports %}
                     <tr>
-                        <td class="text-center">{{ c.name }}</td>
+                        <td>{{ c.name }}</td>
                         <td class="text-center">{{ c.owner.username }}</td>
                         <td class="text-center">{{ c.total_attempts }}</td>
                         <td class="text-center">{{ c.success_count }}</td>

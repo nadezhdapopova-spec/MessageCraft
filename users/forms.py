@@ -1,5 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
 
 from .models import CustomUser
 
@@ -34,12 +36,19 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_avatar(self):
         """Метод валидации поля формы 'аватар' на формат и размер файла"""
         avatar = self.cleaned_data.get("avatar")
-        if hasattr(avatar, "content_type"):
-            if avatar.content_type not in ["avatar/jpeg", "avatar/png"]:
-                raise forms.ValidationError("Файл должен быть в формате JPEG или PNG")
-            max_size_mb = 5
-            if avatar.size > max_size_mb * 1024 * 1024:
-                raise forms.ValidationError(f"Размер файла не должен превышать {max_size_mb} МБ")
+        if not avatar or isinstance(avatar, str):
+            return avatar
+        valid_content_types = ["image/jpeg", "image/png"]
+        if avatar.content_type not in valid_content_types:
+            raise forms.ValidationError("Файл должен быть в формате JPEG или PNG")
+        valid_extensions = [".jpg", ".jpeg", ".png"]
+        import os
+        ext = os.path.splitext(avatar.name)[1].lower()
+        if ext not in valid_extensions:
+            raise forms.ValidationError("Недопустимое расширение файла. Используйте JPG или PNG")
+        max_size_mb = 5
+        if avatar.size > max_size_mb * 1024 * 1024:
+            raise forms.ValidationError(f"Размер файла не должен превышать {max_size_mb} МБ")
         return avatar
 
 
@@ -68,3 +77,22 @@ class UserPasswordForm(PasswordChangeForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({"class": "form-control"})
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control"}))
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if not CustomUser.objects.filter(email=email).exists():
+            raise ValidationError("Пользователь с таким email не найден")
+        return email
+
+    def save(self, *args, **kwargs):
+        if 'html_email_template_name' not in kwargs or kwargs['html_email_template_name'] is None:
+            kwargs['html_email_template_name'] = 'users/password_reset_email.html'
+        return super().save(*args, **kwargs)
+
+class CustomSetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))
+    new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))

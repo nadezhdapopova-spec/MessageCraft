@@ -24,19 +24,25 @@ class CampaignListView(LoginRequiredMixin, ListView):
     model = Campaign
     template_name = "campaigns/campaigns_list.html"
     context_object_name = "campaigns"
-    paginate_by = 20
-
-
-    def get_context_data(self, **kwargs):
-        """Добавляет поиск по рассылкам в контекст"""
-        context = super().get_context_data(**kwargs)
-        context["search_type"] = "campaigns"
-        return context
+    paginate_by = 10
 
 
     def get_queryset(self):
-        """Возвращает список рассылок с учётом прав пользователя"""
-        return get_cached_objects(self.request.user, self.model)
+        """Возвращает список рассылок с учётом прав пользователя и фильтра по статусу"""
+        qs = get_cached_objects(self.request.user, self.model)
+        status_filter = self.request.GET.get("status")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs.order_by("-created_at")
+
+
+    def get_context_data(self, **kwargs):
+        """Добавляет поиск и фильтр по статусам в контекст"""
+        context = super().get_context_data(**kwargs)
+        context["search_type"] = "campaigns"
+        context["statuses"] = Campaign.STATUS_CHOICES
+        context["current_status"] = self.request.GET.get("status", "")
+        return context
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
