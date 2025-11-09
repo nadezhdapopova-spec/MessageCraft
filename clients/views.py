@@ -19,19 +19,25 @@ class ClientListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = "clients/clients_list.html"
     context_object_name = "clients"
-    paginate_by = 30
+    paginate_by = 10
 
 
     def get_context_data(self, **kwargs):
         """Добавляет поиск по получателям рассылок в контекст"""
         context = super().get_context_data(**kwargs)
         context["search_type"] = "client"
+        context["query"] = self.request.GET.get("q", "")
         return context
 
 
     def get_queryset(self):
         """Возвращает список получателей рассылок с учётом прав пользователя"""
-        return get_cached_objects(self.request.user, self.model)
+        qs = get_cached_objects(self.request.user, self.model)
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            search_qs = search_objects(query, self.model)
+            qs = qs.filter(id__in=search_qs.values_list("id", flat=True))
+        return qs.order_by("owner", "-created_at", "email")
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")

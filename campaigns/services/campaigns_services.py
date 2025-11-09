@@ -1,6 +1,5 @@
-from datetime import datetime
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.utils import timezone
 
 from campaigns.models import Campaign, Attempt
@@ -15,29 +14,28 @@ def send_campaign(campaign: Campaign) -> None:
     """
     message = campaign.message
     from_email = settings.DEFAULT_FROM_EMAIL
-    reply_to = message.owner.email if message.owner and message.owner.email else None
-
-    common_kwargs = {
-        "subject": message.subject,
-        "message": message.body if not message.is_html else "",
-        "html_message": message.body if message.is_html else None,
-        "from_email": from_email,
-    }
-    if reply_to:
-        common_kwargs["headers"] = {"Reply-To": reply_to}
+    reply_to = [message.owner.email] if message.owner and message.owner.email else []
 
     for client in campaign.recipients.all():
         try:
-            send_mail(
-                **common_kwargs,
-                recipient_list=[client.email],
+            email = EmailMultiAlternatives(
+                subject=message.subject,
+                body=message.body if not message.is_html else "",
+                from_email=from_email,
+                to=[client.email],
+                reply_to=reply_to,
             )
+            if message.is_html:
+                email.attach_alternative(message.body, "text/html")
+            email.send()
+
             Attempt.objects.create(
                 campaign=campaign,
                 recipient=client,
                 status="SUCCESS",
                 response="OK"
             )
+
         except Exception as e:
             Attempt.objects.create(
                 campaign=campaign,

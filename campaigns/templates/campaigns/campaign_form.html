@@ -34,8 +34,9 @@
                                 {{ form.message }}
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Получатели рассылки:</label>
+                                <label for="id_recipients" class="form-label">Получатели рассылки:</label>
                                 {{ form.recipients }}
+                                <div class="form-text">Удерживайте Ctrl(Cmd на Mac), чтобы выбрать несколько</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Дата и время начала:</label>
@@ -66,3 +67,5 @@
     </div>
 </section>
 {% endblock %}
+
+

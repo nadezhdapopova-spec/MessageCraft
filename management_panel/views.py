@@ -44,7 +44,7 @@ def block_users(request):
         users = CustomUser.objects.filter(id__in=ids)
         users.update(is_active=False)
         messages.success(request, f"Пользователи ({len(ids)}) заблокированы")
-    return redirect("management:users_management")
+    return redirect("management_panel:users_management")
 
 
 @login_required
@@ -52,6 +52,6 @@ def block_users(request):
 def stop_campaigns(request):
     ids = request.POST.getlist("selected_campaigns")
     if ids:
-        Campaign.objects.filter(id__in=ids).update(status="STOPPED")
+        Campaign.objects.filter(id__in=ids).update(status="DISABLED")
         messages.success(request, f"Остановлено рассылок: {len(ids)}")
-    return redirect("management:campaigns_management")
+    return redirect("management_panel:campaigns_management")

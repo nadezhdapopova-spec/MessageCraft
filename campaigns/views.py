@@ -30,6 +30,12 @@ class CampaignListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """Возвращает список рассылок с учётом прав пользователя и фильтра по статусу"""
         qs = get_cached_objects(self.request.user, self.model)
+
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            search_qs = search_objects(query, self.model)
+            qs = qs.filter(id__in=search_qs.values_list("id", flat=True))
+
         status_filter = self.request.GET.get("status")
         if status_filter:
             qs = qs.filter(status=status_filter)
@@ -42,10 +48,11 @@ class CampaignListView(LoginRequiredMixin, ListView):
         context["search_type"] = "campaigns"
         context["statuses"] = Campaign.STATUS_CHOICES
         context["current_status"] = self.request.GET.get("status", "")
+        context["query"] = self.request.GET.get("q", "")
         return context
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
+# @method_decorator(cache_page(60 * 15), name="dispatch")
 class CampaignDetailView(LoginRequiredMixin, DetailView):
     """Представление для отображения сообщения"""
     model = Campaign
@@ -78,6 +85,13 @@ class CampaignCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("campaigns:campaigns_list")
 
 
+    def get_form_kwargs(self):
+        """Передает пользователя в аргументы формы"""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+
     def get_context_data(self, **kwargs):
         """Определяет в контексте объект рассылки"""
         context = super().get_context_data(**kwargs)
@@ -106,6 +120,13 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "campaigns/campaign_form.html"
     form_class = CampaignForm
     context_object_name = "campaign"
+
+
+    def get_form_kwargs(self):
+        """Добавляем пользователя в аргументы формы"""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
 
     def get_context_data(self, **kwargs):

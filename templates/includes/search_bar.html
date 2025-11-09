@@ -1,8 +1,7 @@
-<form method="get"
-{#      action="{% if search_type == 'product' %}{% url 'catalog:product_search' %}{% elif search_type == 'blog' %}{% url 'blog:blogpost_search' %}{% endif %}"#}
-      class="mb-4 text-center">
+<form method="get" action="" class="mb-4 text-center">
+    <input type="hidden" name="status" value="{{ current_status }}">
     <div class="d-flex justify-content-center align-items-center flex-column flex-md-row gap-2 w-100">
-        <input name="q" value="{{ request.GET.q }}" placeholder="Поиск"
+        <input type="text" name="q" value="{{ query }}" placeholder="Поиск"
                class="form-control flex-grow-1 me-md-2 mb-2 mb-md-0 search-input" style="max-width: 600px;" />
         <button type="submit"
                 class="btn btn-outline-success d-flex align-items-center justify-content-center"

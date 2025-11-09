@@ -27,12 +27,18 @@ class MailingListView(LoginRequiredMixin, ListView):
         """Добавляет поиск по сообщениям в контекст"""
         context = super().get_context_data(**kwargs)
         context["search_type"] = "mailings"
+        context["query"] = self.request.GET.get("q", "")
         return context
 
 
     def get_queryset(self):
         """Возвращает список сообщений с учётом прав пользователя"""
-        return get_cached_objects(self.request.user, self.model)
+        qs = get_cached_objects(self.request.user, self.model)
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            search_qs = search_objects(query, self.model)
+            qs = qs.filter(id__in=search_qs.values_list("id", flat=True))
+        return qs.order_by("owner", "-created_at", "subject")
 
 
 @method_decorator(cache_page(60 * 15), name="dispatch")

@@ -40,6 +40,12 @@
   <button class="btn btn-danger mt-3">🚫 Заблокировать выбранных</button>
 </form>
 
+{% if page_obj.has_other_pages %}
+    <div class="mt-auto">
+        {% include "includes/pagination.html" %}
+    </div>
+{% endif %}
+
 <script>
   document.getElementById("selectAll").addEventListener("change", function() {
     document.querySelectorAll("input[name='selected_users']").forEach(cb => cb.checked = this.checked);

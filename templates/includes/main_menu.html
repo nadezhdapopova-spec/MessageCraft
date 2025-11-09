@@ -33,9 +33,9 @@
                             <li><a class="dropdown-item" href="{% url 'campaigns:campaigns_list' %}">Ваша рассылка</a></li>
                             <li><a class="dropdown-item" href="{% url 'clients:clients_list' %}">Ваши клиенты</a></li>
                             <li><a class="dropdown-item" href="{% url 'mailings:mailings_list' %}">Сообщения</a></li>
-{#                            {% if not perms.users.can_block_users %}#}
+                            {% if not perms.users.can_block_users %}
                                 <li><a class="dropdown-item" href="{% url 'reports:user_dashboard' %}">Личная статистика</a></li>
-{#                            {% endif %}#}
+                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'reports:campaign_report' %}">Персональный отчет</a></li>
                         </ul>
                     </li>

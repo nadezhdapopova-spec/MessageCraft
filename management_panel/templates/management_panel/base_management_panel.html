@@ -50,7 +50,6 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <h4 class="text-center fw-bold mb-4">🌿 Панель менеджера</h4>
     <a href="{% url 'management_panel:users_management' %}" class="{% if request.path == '/management_panel/users/' %}active{% endif %}">👥 Пользователи</a>
@@ -60,7 +59,6 @@
     <a href="{% url 'reports:home' %}">🚪 На главную страницу</a>
   </div>
 
-  <!-- Content -->
   <div class="content">
     {% block content %}{% endblock %}
   </div>

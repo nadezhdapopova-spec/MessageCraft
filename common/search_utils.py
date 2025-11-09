@@ -1,32 +1,51 @@
 import re
-from django.db.models import Q, Model
+from django.db.models import Q, Model, QuerySet
 from django.core.cache import cache
 from .cache_utils import CACHE_TIMEOUT
 
 
-def search_objects(query: str, model: type[Model], cache_timeout: int = CACHE_TIMEOUT):
-    """Поиск клиентов по email, ФИО и комментарию"""
-    app_name = model._meta.app_label
-
+def search_objects(query: str, source, cache_timeout: int = CACHE_TIMEOUT):
+    """
+    Универсальный поиск с автоматическим выбором полей
+    для разных моделей (Client, Campaign и др.).
+    """
     if not query:
-        return model.objects.none()
+        return source.none() if isinstance(source, QuerySet) else source.objects.none()
 
+    if isinstance(source, QuerySet):
+        model = source.model
+        queryset = source
+    elif issubclass(source, Model):
+        model = source
+        queryset = model.objects.all()
+    else:
+        raise TypeError(f"search_objects ожидает Model или QuerySet, а получено {type(source)}")
+
+    app_name = model._meta.app_label
     cache_key = f"search_{app_name}:{query.lower()}"
     cached_ids = cache.get(cache_key)
     if cached_ids is not None:
-        return model.objects.filter(id__in=cached_ids)
+        return queryset.filter(id__in=cached_ids)
+
+    if model.__name__ == "Client":
+        search_fields = ["email", "full_name", "comment"]
+    elif model.__name__ == "Campaign":
+        search_fields = ["name", "status", "message__subject", "message__body"]
+    else:
+        search_fields = [
+            f.name for f in model._meta.get_fields()
+            if hasattr(f, "attname") and f.get_internal_type() in ["CharField", "TextField"]
+        ]
 
     keywords = re.findall(r'\w+', query)
     q_objects = Q()
     for word in keywords:
-        q_objects &= (
-            Q(email__icontains=word) |
-            Q(full_name__icontains=word) |
-            Q(comment__icontains=word)
-        )
+        sub_q = Q()
+        for field in search_fields:
+            sub_q |= Q(**{f"{field}__icontains": word})
+        q_objects &= sub_q
 
-    queryset = model.objects.filter(q_objects)
-    ids = list(queryset.values_list("id", flat=True))
-    cache.set(cache_key, ids, cache_timeout)
+    results = queryset.filter(q_objects).distinct()
+    cache.set(cache_key, list(results.values_list("id", flat=True)), cache_timeout)
 
-    return queryset
+    return results

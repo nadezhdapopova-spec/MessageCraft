@@ -25,11 +25,13 @@
             <td>{{ campaign.name }}</td>
             <td>
               {% if campaign.status == "RUNNING" %}
-                <span class="badge bg-success">Активна</span>
-              {% elif campaign.status == "STOPPED" %}
-                <span class="badge bg-secondary">Остановлена</span>
+                <span class="badge bg-success">{{ campaign.get_status_display }}</span>
+              {% elif campaign.status == "DISABLED" %}
+                <span class="badge bg-secondary">{{ campaign.get_status_display }}</span>
+              {% elif campaign.status == "FINISHED" %}
+                <span class="badge bg-info">{{ campaign.get_status_display }}</span>
               {% else %}
-                <span class="badge bg-warning text-dark">{{ campaign.status }}</span>
+                <span class="badge bg-warning text-dark">{{ campaign.get_status_display }}</span>
               {% endif %}
             </td>
             <td>{{ campaign.owner.username }}</td>
@@ -42,6 +44,12 @@
   </div>
   <button class="btn btn-warning mt-3">⏹ Остановить выбранные</button>
 </form>
+
+{% if page_obj.has_other_pages %}
+    <div class="mt-auto">
+        {% include "includes/pagination.html" %}
+    </div>
+{% endif %}
 
 <script>
   document.getElementById("selectAll").addEventListener("change", function() {

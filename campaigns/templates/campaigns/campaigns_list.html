@@ -69,11 +69,16 @@
                 </table>
             </div>
 
-            <div class="text-center mt-4 mb-5">
-                <button type="submit" class="btn btn-success">
-                    🚀 Запустить выбранные рассылки
-                </button>
-            </div>
+            {% if campaigns %}
+                {% if not perms.users.can_block_users %}
+                    <div class="text-center mt-4 mb-5">
+                        <button type="submit" class="btn btn-success"
+                            onclick="return confirm('Вы уверены, что хотите запустить выбранные рассылки?')">
+                            🚀 Запустить выбранные рассылки
+                        </button>
+                    </div>
+                {% endif %}
+            {% endif %}
         </form>
 
         {% if page_obj.has_other_pages %}
