@@ -41,7 +41,7 @@ class MailingListView(LoginRequiredMixin, ListView):
         return qs.order_by("owner", "-created_at", "subject")
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
+# @method_decorator(cache_page(60 * 15), name="dispatch")
 class MailingDetailView(LoginRequiredMixin, DetailView):
     """Представление для отображения сообщения"""
     model = Mailing

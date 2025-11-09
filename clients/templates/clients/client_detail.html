@@ -4,37 +4,37 @@
 {% block title %}Редактор карточки получателя рассылки{% endblock %}
 
 {% block content %}
-    <section class="container mx-auto p-6">
+    <section class="container-fluid px-5 py-4 bg-light">
         <div class="pricing-header px-3 py-3 pt-md-4 pb-md-4 mx-auto text-center">
             <h1 class="display-4 fw-normal mt-4 mb-2">Редактор получателей рассылки</h1>
+            <p class="text-muted fs-5">Просмотр информации о клиенте</p>
         </div>
 
-        <div class="container my-5">
-            <div class="card mx-4 my-4 p-4">
-                <div class="row g-4">
-                    <div class="col-7 col-sm-8 d-flex flex-column product-col">
-                        <div class="card-body">
-                            <h1 class="font-weight-normal py-2">{{ client.email }}</h1>
-                            <h1 class="card-title pricing-card-title">{{ client.full_name }} ₽</h1>
-                            <p class="card-text text-justify">{{ client.comment }}</p>
-                        </div>
-
-                        {% if user == client.owner %}
-                            <div class="d-flex justify-content-center gap-3 mt-2 text-center">
-                                <a href="{% url 'clients:client_update' pk=client.pk %}" class="btn-link btn-blue mt-4">Редактировать</a>
-                                <a href="{% url 'clients:client_delete' pk=client.pk %}" class="btn-link btn-red mt-4">Удалить</a>
-                                <a href="{% url 'clients:clients_list' %}" class="btn-link btn-green mt-4">Назад</a>
-                            </div>
-                        {% else %}
-                            <div class="d-flex justify-content-center gap-3 mt-2 text-center ms-auto me-4">
-                                <a href="{% url 'clients:clients_list' %}" class="btn-link btn-green mt-4">Назад</a>
-                            </div>
-                        {% endif %}
-                        <div class="product-updated text-end">
-                            <small class="text-muted">Последнее обновление: {{ client.updated_at|date:"j b Y G:i" }}</small>
-                        </div>
+        <div class="card shadow-lg border-0 rounded-4 p-5 mx-auto" style="max-width: 1200px;">
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title">Email: {{ client.email }}</h1>
+                <h5 class="fw-semibold mt-3 mb-5">ФИО: {{ client.full_name }}</h5>
+                <div class="mb-4">
+                    <h5 class="fw-semibold pricing-card-title text-success mb-2">Комментарий:</h5>
+                    <div class="p-3 bg-white rounded-3 border">
+                        <p style="font-family: 'Merriweather', serif; line-height: 1.7;" class="fs-5">{{ client.comment }}</p>
                     </div>
                 </div>
+            </div>
+
+            {% if user == client.owner %}
+                <div class="d-flex justify-content-center gap-3 mt-2 text-center">
+                    <a href="{% url 'clients:client_update' pk=client.pk %}" class="btn-link btn-blue mt-4">Редактировать</a>
+                    <a href="{% url 'clients:client_delete' pk=client.pk %}" class="btn-link btn-red mt-4">Удалить</a>
+                    <a href="{% url 'clients:clients_list' %}" class="btn-link btn-green mt-4">Назад</a>
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-center gap-3 mt-2 text-center ms-auto me-4">
+                    <a href="{% url 'clients:clients_list' %}" class="btn-link btn-green mt-4">Назад</a>
+                </div>
+            {% endif %}
+            <div class="product-updated text-end">
+                <small class="text-muted">Последнее обновление: {{ client.updated_at|date:"j b Y G:i" }}</small>
             </div>
         </div>
     </section>

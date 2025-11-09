@@ -124,7 +124,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         """При успешном редактировании карточки получателя рассылки возвращает на страницу просмотра карточки"""
-        return reverse_lazy("client:client_detail", kwargs={"pk": self.object.pk})
+        return reverse_lazy("clients:client_detail", kwargs={"pk": self.object.pk})
 
 
 class ClientDeleteView(LoginRequiredMixin, DeleteView):

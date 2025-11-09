@@ -52,7 +52,7 @@ class CampaignListView(LoginRequiredMixin, ListView):
         return context
 
 
-# @method_decorator(cache_page(60 * 15), name="dispatch")
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class CampaignDetailView(LoginRequiredMixin, DetailView):
     """Представление для отображения сообщения"""
     model = Campaign
