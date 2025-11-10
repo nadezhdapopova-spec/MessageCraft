@@ -12,7 +12,7 @@ class MailingForm(forms.ModelForm):
         widgets = {
             "subject": forms.TextInput(attrs={"class": "form-control"}),
             "body": forms.Textarea(attrs={"class": "form-control", "rows": 20}),
-            "is_html": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_html": forms.Select(choices=[(True, "Да"), (False, "Нет")], attrs={"class": "form-select"}),
         }
 
 

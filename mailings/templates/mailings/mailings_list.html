@@ -43,7 +43,7 @@
                                    <u>{{ mail.subject }}</u>
                                 </a>
                             </td>
-                            <td class="text-center">{{ mail.is_html }}</td>
+                            <td class="text-center">{{ mail.is_html|yesno:"Да,Нет" }}</td>
                             <td class="text-center">{{ mail.created_at|date:"d.m.Y H:i" }}</td>
                             <td class="text-center">{{ mail.updated_at|date:"d.m.Y H:i" }}</td>
                             <td class="text-center">{{ mail.owner }}</td>
