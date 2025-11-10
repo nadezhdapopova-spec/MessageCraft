@@ -1,13 +1,19 @@
+import csv
+
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import FormView, ListView, TemplateView
 
 from campaigns.models import Attempt, Campaign
 from clients.models import Client
 from reports.forms import FeedbackForm
 from reports.models import Contacts
+from reports.services.reports_services import get_campaign_report_queryset
 
 
 class DashboardView(TemplateView):
@@ -72,24 +78,7 @@ class CampaignReportView(LoginRequiredMixin, ListView):
         пользователю - отчеты о своих рассылках, менеджеру и суперпользователю - все.
         Добавляет возможность фильтрации по статусу рассылки
         """
-        user = self.request.user
-        status_filter = self.request.GET.get("status")
-
-        qs = Campaign.objects.annotate(
-            total_attempts=Count("attempts"),
-            success_count=Count("attempts", filter=Q(attempts__status="SUCCESS")),
-            fail_count=Count("attempts", filter=Q(attempts__status="FAIL")),
-        ).select_related("owner")
-
-        if not user.is_staff:
-            qs = qs.filter(owner=user)
-            qs = qs.order_by("-created_at")
-        else:
-            qs = qs.order_by("owner__username", "-created_at", "name")
-
-        if status_filter:
-            qs = qs.filter(status=status_filter)
-        return qs
+        return get_campaign_report_queryset(self.request)
 
     def get_context_data(self, **kwargs):
         """Добавляет в контекст статус рассылки"""
@@ -97,6 +86,57 @@ class CampaignReportView(LoginRequiredMixin, ListView):
         context["current_status"] = self.request.GET.get("status", "")
         context["statuses"] = Campaign.STATUS_CHOICES
         return context
+
+
+@login_required
+def export_campaigns_csv(request):
+    """Экспорт отчёта по рассылкам в CSV"""
+    campaigns = get_campaign_report_queryset(request)
+
+    if not campaigns.exists():
+        messages.warning(request, "Нет данных для экспорта отчёта.")
+        return redirect("reports:campaign_report")
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")
+    filename = f"campaign_report_{timezone.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.write("\ufeff".encode("utf-8"))
+
+    writer = csv.writer(response, delimiter=";", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(
+        [
+            "ID",
+            "Название кампании",
+            "Статус",
+            "Автор",
+            "Дата создания",
+            "Всего попыток",
+            "Успешно",
+            "Неудачно",
+            "Процент успеха (%)",
+        ]
+    )
+
+    for c in campaigns:
+        success_rate = 0
+        if c.total_attempts > 0:
+            success_rate = round((c.success_count / c.total_attempts) * 100, 2)
+
+        writer.writerow(
+            [
+                c.id,
+                getattr(c, "name", "—"),
+                c.get_status_display() if hasattr(c, "get_status_display") else c.status,
+                c.owner.username if c.owner else "—",
+                c.created_at.strftime("%d.%m.%Y %H:%M"),
+                c.total_attempts,
+                c.success_count,
+                c.fail_count,
+                success_rate,
+            ]
+        )
+
+    return response
 
 
 class ContactsView(FormView):
