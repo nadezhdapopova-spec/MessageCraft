@@ -11,11 +11,9 @@ from clients.models import Client
 from mailings.models import Mailing
 from users.models import CustomUser
 
+
 logger = logging.getLogger("users")
-
-
 fake = Faker("ru_RU")
-
 MAIL_THEMES = [
     "Новости компании",
     "Акции и скидки",
@@ -88,7 +86,8 @@ class Command(BaseCommand):
                                 timestamp=timezone.now() - timezone.timedelta(minutes=random.randint(0, 1000)),
                             )
 
-            self.stdout.write(self.style.SUCCESS("Тестовые данные с тематикой и HTML письмами успешно сгенерированы!"))
+            logger.info("Тестовые данные успешно сгенерированы и записаны в базу данных")
+            self.stdout.write(self.style.SUCCESS("Тестовые данные с тематикой и HTML письмами успешно сгенерированы"))
         except Exception as e:
             logger.error(f"Ошибка генерации данных: {e}")
             self.stderr.write(self.style.ERROR(f"Ошибка генерации данных: {e}"))
