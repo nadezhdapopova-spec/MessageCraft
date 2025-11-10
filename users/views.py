@@ -30,7 +30,10 @@ class RegisterView(FormView):
     success_url = reverse_lazy("reports:home")
 
     def form_valid(self, form):
-        """Сохраняет данные пользователя в базу данных, осуществляет вход пользователя в систему как авторизованного"""
+        """
+        Сохраняет данные пользователя в базу данных,
+        осуществляет вход пользователя в систему как авторизованного
+        """
         user = form.save()
         login(self.request, user)
         logger.info(f"Зарегистрирован пользователь {user.email}")
@@ -39,6 +42,7 @@ class RegisterView(FormView):
 
     @staticmethod
     def send_welcome_email(user):
+        """Отправляет приветственное письмо на указанный пользователем email при регистрации"""
         subject = "Добро пожаловать в MessageCraft"
         from_email = os.getenv("EMAIL_HOST_USER")
         recipient_list = [
@@ -62,6 +66,7 @@ class AccountView(LoginRequiredMixin, TemplateView):
     template_name = "users/account.html"
 
     def get_context_data(self, **kwargs):
+        """Добавляет приветствие, форму для личных данных и форму для смены пароля в контекст"""
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context["profile_form"] = kwargs.get("profile_form") or UserProfileForm(instance=user)
@@ -70,6 +75,7 @@ class AccountView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        """Обновляет данные пользователя в личном кабинете"""
         user = request.user
 
         if "save_profile" in request.POST:

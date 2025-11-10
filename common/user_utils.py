@@ -8,7 +8,7 @@ from .permissions import is_manager
 
 
 def get_visible_objects_for_user(user, model: type[Model]):
-    """Возвращает список клиентов, доступных пользователю"""
+    """Возвращает список объектов, доступных пользователю"""
     if not hasattr(model, "owner"):
         raise ImproperlyConfigured(f"Модель {model.__name__} не имеет поля 'owner'")
 
@@ -20,7 +20,7 @@ def get_visible_objects_for_user(user, model: type[Model]):
 
 
 def get_cached_objects(user, model: type[Model], timeout=CACHE_TIMEOUT):
-    """Возвращает кэшированный список клиентов"""
+    """Возвращает кэшированный список объектов"""
     app_name = model._meta.app_label
 
     user_type = "manager" if is_manager(user) else "owner" if user.is_authenticated else "anon"
@@ -37,7 +37,7 @@ def get_cached_objects(user, model: type[Model], timeout=CACHE_TIMEOUT):
 
 
 def invalidate_obj_cache(user, app_name):
-    """Сбрасывает кэш клиентов"""
+    """Сбрасывает кэш объектов"""
     user_types = ["anon", "owner", "manager"]
     if user and user.is_authenticated:
         if is_manager(user):

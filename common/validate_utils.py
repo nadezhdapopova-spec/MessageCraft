@@ -2,6 +2,7 @@ import json
 import re
 
 from django import forms
+
 from fuzzywuzzy import fuzz
 
 
@@ -11,11 +12,9 @@ class SpamChecker:
     THRESHOLD = 85
     SPAM_WORDS_PATH = "data/spam_words.json"
 
-
     def __init__(self):
         self.spam_words = self._load_spam_words(self.SPAM_WORDS_PATH)
         self.pattern = self._build_pattern(self.spam_words)
-
 
     @staticmethod
     def _load_spam_words(filepath: str) -> list:
@@ -27,13 +26,11 @@ class SpamChecker:
         except FileNotFoundError:
             return []
 
-
     @staticmethod
     def _build_pattern(words: list):
         """Создаёт паттерн для поиска запрещённых слов"""
         escaped = [re.escape(word) for word in words]
-        return re.compile(r'(' + "|".join(escaped) + r')\w*', re.IGNORECASE)
-
+        return re.compile(r"(" + "|".join(escaped) + r")\w*", re.IGNORECASE)
 
     def check_text(self, text: str) -> None:
         """Проверяет текст на спам и запрещённые слова"""

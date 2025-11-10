@@ -5,6 +5,10 @@ from clients.models import Client
 
 
 def get_dashboard_stats():
+    """
+    Возвращает статистику по рассылкам: всего рассылок, активных рассылок, уникальных клиентов,
+    успешных/неуспешных рассылок
+    """
     return {
         "total_campaigns": Campaign.objects.count(),
         "active_campaigns": Campaign.objects.filter(status="RUNNING").count(),
@@ -15,6 +19,7 @@ def get_dashboard_stats():
 
 
 def get_campaign_reports():
+    """Возвращает статистику по попыткам рассылок: всего попыток рассылок, успешных/неуспешных попыток рассылок"""
     return (
         Campaign.objects.annotate(
             total_attempts=Count("attempts"),

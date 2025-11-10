@@ -55,7 +55,7 @@ class CampaignListView(LoginRequiredMixin, ListView):
 
 
 class CampaignDetailView(LoginRequiredMixin, DetailView):
-    """Представление для отображения сообщения"""
+    """Представление для отображения рассылки"""
 
     model = Campaign
     template_name = "campaigns/campaign_detail.html"
@@ -68,6 +68,7 @@ class CampaignDetailView(LoginRequiredMixin, DetailView):
         return campaign
 
     def get_context_data(self, **kwargs):
+        """Добавляет попытки, общее количество, количество успешных и неуспешных попыток в контекст"""
         context = super().get_context_data(**kwargs)
         context["attempts"] = self.object.attempts.all().order_by("-timestamp")
         context["success_count"] = self.object.attempts.filter(status="SUCCESS").count()
@@ -121,7 +122,7 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = "campaign"
 
     def get_form_kwargs(self):
-        """Добавляем пользователя в аргументы формы"""
+        """Добавляет пользователя в аргументы формы"""
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
@@ -133,14 +134,14 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — автор или суперпользователь"""
+        """Возвращает кэшированыый объект рассылки, если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
             check_user_can_edit(self.request.user, self._cached_object)
         return self._cached_object
 
     def form_valid(self, form):
-        """После успешного сохранения формы сбрасывает кэш"""
+        """После успешного сохранения формы рассылки сбрасывает кэш"""
         form.instance.status = "CREATED"
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
@@ -170,7 +171,7 @@ class CampaignDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("campaigns:campaigns_list")
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — владелец или суперпользователь"""
+        """Возвращает объект, если пользователь — автор или суперпользователь"""
         campaign = super().get_object(queryset)
         check_user_can_delete(self.request.user, campaign)
         return campaign

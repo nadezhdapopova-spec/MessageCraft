@@ -7,10 +7,7 @@ from .cache_utils import CACHE_TIMEOUT
 
 
 def search_objects(query: str, source, cache_timeout: int = CACHE_TIMEOUT):
-    """
-    Универсальный поиск с автоматическим выбором полей
-    для разных моделей (Client, Campaign и др.).
-    """
+    """Универсальный поиск с автоматическим выбором полей для моделей"""
     if not query:
         return source.none() if isinstance(source, QuerySet) else source.objects.none()
 

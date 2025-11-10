@@ -28,7 +28,7 @@ def check_user_can_delete(user, obj, entity_name="объект"):
 
 
 def can_user_view(user, obj):
-    """Проверяет доступ к карточке клиента"""
+    """Проверяет доступ к карточке объекта"""
     if not user.is_authenticated:
         raise Http404("Информация недоступна")
     if not is_manager(user) and obj.owner != user:

@@ -100,14 +100,14 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — автор или суперпользователь"""
+        """Возвращает кэшированный объект получателя рассылки, если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
             check_user_can_edit(self.request.user, self._cached_object, "карточку получателя рассылки")
         return self._cached_object
 
     def form_valid(self, form):
-        """После успешного сохранения формы сбрасывает кэш"""
+        """После успешного сохранения формы получателя рассылки сбрасывает кэш"""
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         logger.info(f"Получатель рассылки {self.object.pk} обновлен пользователем {self.request.user}")
@@ -136,13 +136,13 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("clients:clients_list")
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — владелец или суперпользователь"""
+        """Возвращает объект получателя рассылки, если пользователь — владелец или суперпользователь"""
         client = super().get_object(queryset)
         check_user_can_delete(self.request.user, client, "карточку получателя рассылки")
         return client
 
     def delete(self, request, *args, **kwargs):
-        """После удаления сбрасывает кэш клиентов"""
+        """После удаления сбрасывает кэш"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
         invalidate_obj_cache(request.user, self.model._meta.app_label)

@@ -4,6 +4,8 @@ from .models import Client
 
 
 class ClientForm(forms.ModelForm):
+    """Форма для создания получателя рассылки"""
+
     class Meta:
         model = Client
         fields = ["email", "full_name", "comment"]

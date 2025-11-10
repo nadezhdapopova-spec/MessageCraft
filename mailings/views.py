@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -96,20 +95,20 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = "mail"
 
     def get_context_data(self, **kwargs):
-        """Возвращает контекст объект сообщения"""
+        """Добавляет в контекст объект сообщения"""
         context = super().get_context_data(**kwargs)
         context["obj"] = self.object
         return context
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — автор или суперпользователь"""
+        """Возвращает объект сообщения, если пользователь — автор или суперпользователь"""
         if not hasattr(self, "_cached_object"):
             self._cached_object = super().get_object(queryset)
             check_user_can_edit(self.request.user, self._cached_object)
         return self._cached_object
 
     def form_valid(self, form):
-        """После успешного сохранения формы сбрасывает кэш"""
+        """После успешного сохранения формы сообщения сбрасывает кэш"""
         response = super().form_valid(form)
         invalidate_obj_cache(self.request.user, self.model._meta.app_label)
         logger.info(f"Сообщение {self.object.pk} обновлено пользователем {self.request.user}")
@@ -125,7 +124,7 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         raise PermissionDenied("У вас нет прав для редактирования сообщения")
 
     def get_success_url(self):
-        """При успешном редактировании сообщения возвращает на страницу просмотра сообщения"""
+        """При успешном редактировании возвращает на страницу просмотра сообщения"""
         return reverse_lazy("mailings:mailing_detail", kwargs={"pk": self.object.pk})
 
 
@@ -138,13 +137,13 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("mailings:mailings_list")
 
     def get_object(self, queryset=None):
-        """Возвращает объект только если пользователь — владелец или суперпользователь"""
+        """Возвращает объект сообщения, если пользователь — владелец или суперпользователь"""
         mail = super().get_object(queryset)
         check_user_can_delete(self.request.user, mail)
         return mail
 
     def delete(self, request, *args, **kwargs):
-        """После удаления сбрасывает кэш сообщения"""
+        """После удаления сообщения сбрасывает кэш"""
         self.object = self.get_object()
         response = super().delete(request, *args, **kwargs)
         invalidate_obj_cache(request.user, self.model._meta.app_label)
@@ -169,7 +168,7 @@ class MailingPreviewView(LoginRequiredMixin, DetailView):
     context_object_name = "mail"
 
     def get_object(self, queryset=None):
-        """Доступ только автору или суперпользователю"""
+        """Устанавливает доступ к предпросмотру только для автора или суперпользователя"""
         mail = super().get_object(queryset)
         user = self.request.user
         if not (user == mail.owner or user.is_superuser):

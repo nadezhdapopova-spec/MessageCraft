@@ -29,20 +29,9 @@ fuzzywuzzy = "^0.18.0"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.3.0"
-mypy = "^1.18.2"
 isort = "^7.0.0"
 black = "^25.9.0"
 
-[tool.mypy]
-disallow_untyped_defs=true
-warn_return_any=true
-exclude = """
-/(
-    .git
-    .venv
-    venv
-)/
-"""
 
 [tool.black]
 line-length = 119

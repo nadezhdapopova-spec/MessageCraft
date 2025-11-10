@@ -11,7 +11,6 @@ from clients.models import Client
 from mailings.models import Mailing
 from users.models import CustomUser
 
-
 logger = logging.getLogger("users")
 fake = Faker("ru_RU")
 MAIL_THEMES = [

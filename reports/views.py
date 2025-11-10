@@ -16,6 +16,11 @@ class DashboardView(TemplateView):
     template_name = "reports/home.html"
 
     def get_context_data(self, **kwargs):
+        """
+        Добавляет общую статистику в контекст:
+        всего рассылок, активных рассылок, уникальных клиентов,
+        всего попыток рассылок, успешных/неуспешных попыток рассылок
+        """
         context = super().get_context_data(**kwargs)
 
         context["total_campaigns"] = Campaign.objects.count()
@@ -35,6 +40,11 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "reports/user_dashboard.html"
 
     def get_context_data(self, **kwargs):
+        """
+        Добавляет статистику пользователя в контекст:
+        всего рассылок, активных рассылок, уникальных клиентов,
+        всего попыток рассылок, успешных/неуспешных попыток рассылок
+        """
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
@@ -51,13 +61,17 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
 class CampaignReportView(LoginRequiredMixin, ListView):
     """Страница отчётов по рассылкам:количество попыток, процент успеха, владелец"""
 
-    # model = Campaign
     template_name = "reports/campaign_report.html"
     context_object_name = "reports"
     paginate_by = 10
     login_url = "users:login"
 
     def get_queryset(self):
+        """
+        Возвращает список отчетов о рассылках в зависимости от прав пользователя:
+        пользователю - отчеты о своих рассылках, менеджеру и суперпользователю - все.
+        Добавляет возможность фильтрации по статусу рассылки
+        """
         user = self.request.user
         status_filter = self.request.GET.get("status")
 
@@ -78,6 +92,7 @@ class CampaignReportView(LoginRequiredMixin, ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        """Добавляет в контекст статус рассылки"""
         context = super().get_context_data(**kwargs)
         context["current_status"] = self.request.GET.get("status", "")
         context["statuses"] = Campaign.STATUS_CHOICES
@@ -105,8 +120,7 @@ class ContactsView(FormView):
 
     def form_invalid(self, form):
         """
-        Добавляет сообщение об ошибке, возвращает пользователя на страницу с формой
-        и показывает ошибки валидации
+        Добавляет сообщение об ошибке, возвращает пользователя на страницу с формой и показывает ошибки валидации
         """
         messages.error(self.request, "Пожалуйста, заполните все поля")
         return super().form_invalid(form)
