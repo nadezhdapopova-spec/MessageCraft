@@ -2,10 +2,13 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import redirect
+from django.contrib.sessions.models import Session
+from django.shortcuts import redirect, get_object_or_404
+from django.utils import timezone
 from django.views.generic import ListView
 
 from campaigns.models import Campaign
+from campaigns.services.campaigns_services import enable_campaign
 from common.permissions import is_manager
 from users.models import CustomUser
 
@@ -48,13 +51,19 @@ class CampaignsManagementView(ManagerRequiredMixin, ListView):
 
 
 @login_required
-@user_passes_test(is_manager)
+@user_passes_test(lambda u: u.is_superuser or u.is_manager)
 def block_users(request):
     """Блокирует выбранных пользователей"""
     ids = request.POST.getlist("selected_users")
     if ids:
         users = CustomUser.objects.filter(id__in=ids)
         users.update(is_active=False)
+        sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        for session in sessions:
+            data = session.get_decoded()
+            user_id = data.get('_auth_user_id')
+            if user_id and int(user_id) in map(int, ids):
+                session.delete()
         logger.info(f"Пользователи ({len(ids)}) заблокированы: {ids}")
         messages.success(request, f"Пользователи ({len(ids)}) заблокированы")
     return redirect("management_panel:users_management")
@@ -66,7 +75,25 @@ def stop_campaigns(request):
     """Останавливает выбранные рассылки"""
     ids = request.POST.getlist("selected_campaigns")
     if ids:
-        Campaign.objects.filter(id__in=ids).update(status="DISABLED")
+        Campaign.objects.filter(id__in=ids).exclude(status="DISABLED").update(status="DISABLED")
         logger.info(f"Остановлено рассылок: {len(ids)} ({ids})")
         messages.success(request, f"Остановлено рассылок: {len(ids)}")
+    return redirect("management_panel:campaigns_management")
+
+
+@login_required
+@user_passes_test(is_manager)
+def enable_campaign_view(request, pk):
+    """Включает (повторно активирует) выбранные рассылки"""
+    ids = request.POST.getlist("selected_campaigns")
+    if ids:
+        campaigns = Campaign.objects.filter(id__in=ids, status="DISABLED")
+        count = campaigns.count()
+        campaigns.update(status="CREATED", is_active=True)
+
+        logger.info(f"Активировано рассылок: {count} ({ids})")
+        messages.success(request, f"Активировано рассылок: {count}")
+    else:
+        messages.warning(request, "Не выбрано ни одной рассылки для активации")
+
     return redirect("management_panel:campaigns_management")

@@ -1,9 +1,10 @@
+import atexit
 import logging
 import os
 
 from django.apps import AppConfig
-
 from apscheduler.schedulers.background import BackgroundScheduler
+
 
 logger = logging.getLogger("campaigns")
 
@@ -18,10 +19,13 @@ class CampaignsConfig(AppConfig):
             logger.debug("Пропуск запуска планировщика (RUN_MAIN != true)")
             return
 
-        from campaigns.services.campaigns_services import send_scheduled_campaigns
+        import campaigns.services.campaigns_services as services
 
-        scheduler = BackgroundScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(send_scheduled_campaigns, "interval", minutes=1)
-        scheduler.start()
+        scheduler_instance = BackgroundScheduler(timezone="Europe/Moscow")
+        scheduler_instance.add_job(services.send_scheduled_campaigns, "interval", minutes=1)
+        scheduler_instance.start()
+
+        services.scheduler = scheduler_instance
+        atexit.register(lambda: scheduler_instance.shutdown(wait=False))
 
         logger.info("Планировщик рассылок успешно запущен (интервал: 1 минута)")
