@@ -4,6 +4,7 @@ import os
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
@@ -15,7 +16,7 @@ from dotenv import load_dotenv
 
 from config.settings import BASE_DIR
 
-from .forms import CustomUserCreationForm, UserPasswordForm, UserProfileForm
+from .forms import CustomUserCreationForm, UserPasswordForm, UserProfileForm, CustomAuthenticationForm
 from .services.user_services import get_greeting
 
 load_dotenv(BASE_DIR / ".env")
@@ -100,3 +101,8 @@ class AccountView(LoginRequiredMixin, TemplateView):
             return self.render_to_response(self.get_context_data(password_form=password_form))
 
         return self.get(request, *args, **kwargs)
+
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    template_name = "users/login.html"

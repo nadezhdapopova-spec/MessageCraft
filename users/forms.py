@@ -1,8 +1,16 @@
+import logging
+
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm, \
+    AuthenticationForm
 from django.core.exceptions import ValidationError
 
 from .models import CustomUser
+
+
+logger = logging.getLogger("users")
+User = get_user_model()
 
 
 class CustomClearableFileInput(forms.ClearableFileInput):
@@ -119,3 +127,14 @@ class CustomSetPasswordForm(SetPasswordForm):
 
     new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))
     new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    """Форма авторизации с сообщением о блокировке пользователя"""
+    def confirm_login_allowed(self, user):
+        logger.warning(f"Проверка логина: {user.email} (is_active={user.is_active})")
+        if not user.is_active:
+            raise ValidationError(
+                "Ваш аккаунт заблокирован. Обратитесь к администратору: message-craft-service@yandex.ru",
+                code="inactive",
+            )

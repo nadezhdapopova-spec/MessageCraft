@@ -37,7 +37,15 @@
       </table>
     </div>
   </div>
-  <button class="btn btn-danger mt-3">🚫 Заблокировать выбранных</button>
+
+  <div class="d-flex justify-content gap-3 mt-2">
+      <button type="submit" formaction="{% url 'management_panel:block_users' %}" class="btn btn-danger mt-4">
+          🚫 Заблокировать выбранных
+      </button>
+      <button type="submit" formaction="{% url 'management_panel:unblock_users' %}" class="btn btn-success mt-4">
+          Разблокировать выбранных
+      </button>
+  </div>
 </form>
 
 {% if page_obj.has_other_pages %}

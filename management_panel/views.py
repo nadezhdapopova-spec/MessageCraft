@@ -50,7 +50,7 @@ class CampaignsManagementView(ManagerRequiredMixin, ListView):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser or u.is_manager)
+@user_passes_test(is_manager)
 def block_users(request):
     """Блокирует выбранных пользователей"""
     ids = request.POST.getlist("selected_users")
@@ -65,6 +65,21 @@ def block_users(request):
                 session.delete()
         logger.info(f"Пользователи ({len(ids)}) заблокированы: {ids}")
         messages.success(request, f"Пользователи ({len(ids)}) заблокированы")
+    return redirect("management_panel:users_management")
+
+
+@login_required
+@user_passes_test(is_manager)
+def unblock_users(request):
+    """Разблокирует выбранных пользователей"""
+    ids = request.POST.getlist("selected_users")
+    if ids:
+        users = CustomUser.objects.filter(id__in=ids)
+        count = users.update(is_active=True)
+        logger.info(f"Пользователи ({count}) разблокированы: {ids}")
+        messages.success(request, f"Пользователи ({count}) разблокированы")
+    else:
+        messages.warning(request, "Не выбрано ни одного пользователя для разблокировки")
     return redirect("management_panel:users_management")
 
 

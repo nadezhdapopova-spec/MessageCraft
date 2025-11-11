@@ -232,12 +232,20 @@ LOGGING = {
             "formatter": "verbose",
             "encoding": "utf-8",
         },
+        "file_management_panel": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "mailings.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
     },
     "loggers": {
         "django": {
             "handlers": ["console", "file_django"],
             "level": "INFO",
-            "propagate": True,
+            "propagate": False,
         },
         "campaigns": {
             "handlers": ["console", "file_campaigns"],
@@ -251,6 +259,11 @@ LOGGING = {
         },
         "mailings": {
             "handlers": ["console", "file_mailings"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "management_panel": {
+            "handlers": ["console", "file_management_panel"],
             "level": "INFO",
             "propagate": False,
         },
