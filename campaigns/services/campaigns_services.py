@@ -1,6 +1,7 @@
 import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.date import DateTrigger
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
@@ -12,17 +13,21 @@ logger = logging.getLogger("campaigns")
 scheduler: BackgroundScheduler | None = None
 
 
-def send_campaign(campaign: Campaign) -> None:
+def send_campaign(campaign_id: int) -> None:
     """
     Отправляет рассылку всем получателям и создаёт записи Attempt.
     Письма отправляются от DEFAULT_FROM_EMAIL,
     а ответы — на почту автора сообщения (через Reply-To)
     """
-    if not campaign.is_active or campaign.status == "DISABLED":
-        logger.warning(f"Рассылка {campaign.id} ('{campaign.name}') отключена — отправка прервана.")
+    try:
+        campaign = Campaign.objects.get(pk=campaign_id)
+    except Campaign.DoesNotExist:
+        logger.error(f"Рассылка {campaign_id} не найдена.")
         return
-    Campaign.objects.filter(pk=campaign.pk).update(status="RUNNING")
-    campaign.refresh_from_db(fields=["status"])
+    if not campaign.is_active or campaign.status == "DISABLED":
+        logger.info(f"Рассылка {campaign.id} ('{campaign.name}') отключена — запуск отменён.")
+        return
+    Campaign.objects.filter(pk=campaign.id).update(status="RUNNING")
     logger.info(f"Рассылка {campaign.id}: статус изменён на RUNNING")
     message = campaign.message
     from_email = settings.DEFAULT_FROM_EMAIL
@@ -79,12 +84,15 @@ def send_scheduled_campaigns() -> None:
         logger.info("Нет рассылок для запуска")
         return
 
-    logger.info(f"Найдено {total} рассылок для запуска ({now:%Y-%m-%d %H:%M:%S})")
     for campaign in campaigns:
         try:
-            send_campaign(campaign)
+            Campaign.objects.filter(pk=campaign.pk).update(status="QUEUED")
+            trigger = DateTrigger(run_date=now)
+            scheduler.add_job(send_campaign, trigger, args=[campaign.pk])
+            logger.info(f"Поставлена в очередь рассылка {campaign.id}: '{campaign.name}'")
         except Exception as e:
             logger.error(f"Ошибка при запуске рассылки {campaign.id}: {e}")
+    logger.info(f"В очередь добавлено рассылок: {total}")
 
 
 def check_user_can_send_campaign(user, campaign):

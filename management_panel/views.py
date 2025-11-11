@@ -3,12 +3,11 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.sessions.models import Session
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import ListView
 
 from campaigns.models import Campaign
-from campaigns.services.campaigns_services import enable_campaign
 from common.permissions import is_manager
 from users.models import CustomUser
 
@@ -83,7 +82,7 @@ def stop_campaigns(request):
 
 @login_required
 @user_passes_test(is_manager)
-def enable_campaign_view(request, pk):
+def enable_campaigns(request):
     """Включает (повторно активирует) выбранные рассылки"""
     ids = request.POST.getlist("selected_campaigns")
     if ids:

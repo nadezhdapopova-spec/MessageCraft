@@ -201,7 +201,7 @@ class CampaignSendView(LoginRequiredMixin, View):
         campaign = get_object_or_404(Campaign, pk=pk)
         check_user_can_send_campaign(self.request.user, campaign)
 
-        send_campaign(campaign)
+        send_campaign(campaign.id)
         messages.success(request, f"Рассылка '{campaign.name}' отправлена")
         return redirect("campaigns:campaign_detail", pk=pk)
 
@@ -222,7 +222,7 @@ def campaign_send_multiple(request):
     for campaign in campaigns:
         try:
             check_user_can_send_campaign(request.user, campaign)
-            send_campaign(campaign)
+            send_campaign(campaign.id)
             sent_count += 1
         except PermissionDenied:
             logger.warning(f"Попытка запуска рассылки {campaign.name} пользователем  без прав  доступа {request.user}")

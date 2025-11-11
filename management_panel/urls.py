@@ -1,8 +1,7 @@
 from django.urls import path
 
 from management_panel.views import CampaignsManagementView, UsersManagementView, block_users, stop_campaigns, \
-    enable_campaign_view
-
+    enable_campaigns
 
 app_name = "management_panel"
 
@@ -11,5 +10,5 @@ urlpatterns = [
     path("campaigns/", CampaignsManagementView.as_view(), name="campaigns_management"),
     path("users/block/", block_users, name="block_users"),
     path("campaigns/stop/", stop_campaigns, name="stop_campaigns"),
-    path("enable/<int:pk>/", enable_campaign_view, name="enable_campaign"),
+    path("campaigns/enable/", enable_campaigns, name="enable_campaigns"),
 ]
