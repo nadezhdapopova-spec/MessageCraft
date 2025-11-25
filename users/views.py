@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 from config.settings import BASE_DIR
 
-from .forms import CustomUserCreationForm, UserPasswordForm, UserProfileForm, CustomAuthenticationForm
+from .forms import CustomAuthenticationForm, CustomUserCreationForm, UserPasswordForm, UserProfileForm
 from .services.user_services import get_greeting
 
 load_dotenv(BASE_DIR / ".env")

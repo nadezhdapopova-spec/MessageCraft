@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
 
-from django.apps import apps
-
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

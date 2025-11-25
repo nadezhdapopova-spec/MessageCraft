@@ -97,10 +97,10 @@ def export_campaigns_csv(request):
         messages.warning(request, "Нет данных для экспорта отчёта.")
         return redirect("reports:campaign_report")
 
-    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")
-    filename = f"campaign_report_{timezone.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    response.write("\ufeff".encode("utf-8"))
+    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")  # cоздаётся HTTP-ответ: это CSV-файл, кодировка UTF-8 с BOM (помогает Excel корректно распознавать русские буквы)
+    filename = f"campaign_report_{timezone.now().strftime('%Y%m%d_%H%M%S')}.csv"  # campaign_report_20240215_153422.csv: уникальное имя
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'  # заголовок HTTP, который говорит браузеру: не показывать файл в браузере, а скачать его как вложение, установить имя файла
+    response.write("\ufeff".encode("utf-8"))  # запись BOM (Byte Order Mark) в начало файла, чтобы Excel и другие программы правильно поняли кодировку UTF-8 и корректно показали кириллицу
 
     writer = csv.writer(response, delimiter=";", quotechar='"', quoting=csv.QUOTE_MINIMAL)
     writer.writerow(

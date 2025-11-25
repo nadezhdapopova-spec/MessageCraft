@@ -60,7 +60,7 @@ def block_users(request):
         sessions = Session.objects.filter(expire_date__gte=timezone.now())
         for session in sessions:
             data = session.get_decoded()
-            user_id = data.get('_auth_user_id')
+            user_id = data.get("_auth_user_id")
             if user_id and int(user_id) in map(int, ids):
                 session.delete()
         logger.info(f"Пользователи ({len(ids)}) заблокированы: {ids}")

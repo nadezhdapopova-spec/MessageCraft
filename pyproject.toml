@@ -2,7 +2,7 @@
 name = "messagecraft"
 version = "0.1.0"
 description = "Study project for creating django web application"
-authors = ["Your Name <you@example.com>"]
+authors = ["Nadezhda_Popova <nadezhdapopova13@yandex.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

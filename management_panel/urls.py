@@ -1,7 +1,13 @@
 from django.urls import path
 
-from management_panel.views import CampaignsManagementView, UsersManagementView, block_users, stop_campaigns, \
-    enable_campaigns, unblock_users
+from management_panel.views import (
+    CampaignsManagementView,
+    UsersManagementView,
+    block_users,
+    enable_campaigns,
+    stop_campaigns,
+    unblock_users,
+)
 
 app_name = "management_panel"
 

@@ -3,8 +3,8 @@ import logging
 import os
 
 from django.apps import AppConfig
-from apscheduler.schedulers.background import BackgroundScheduler
 
+from apscheduler.schedulers.background import BackgroundScheduler
 
 logger = logging.getLogger("campaigns")
 

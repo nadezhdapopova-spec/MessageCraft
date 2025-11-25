@@ -1,6 +1,6 @@
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 
 class BlockedUserMiddleware:
@@ -13,7 +13,9 @@ class BlockedUserMiddleware:
         user = getattr(request, "user", None)
         if user and user.is_authenticated and not user.is_active:
             logout(request)
-            messages.error(request,
-                           "Ваш аккаунт заблокирован. Для разблокировки аккаунта просим обратиться message-craft-service@yandex.ru")
+            messages.error(
+                request,
+                "Ваш аккаунт заблокирован.Просим обратиться message-craft-service@yandex.ru",
+            )
             return redirect("users:login")
         return self.get_response(request)

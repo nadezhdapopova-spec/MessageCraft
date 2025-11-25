@@ -2,12 +2,16 @@ import logging
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm, \
-    AuthenticationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UserCreationForm,
+)
 from django.core.exceptions import ValidationError
 
 from .models import CustomUser
-
 
 logger = logging.getLogger("users")
 User = get_user_model()
@@ -131,6 +135,7 @@ class CustomSetPasswordForm(SetPasswordForm):
 
 class CustomAuthenticationForm(AuthenticationForm):
     """Форма авторизации с сообщением о блокировке пользователя"""
+
     def confirm_login_allowed(self, user):
         logger.warning(f"Проверка логина: {user.email} (is_active={user.is_active})")
         if not user.is_active:
