@@ -1,6 +1,8 @@
+{% load static %}
+
 <div class="box-shadow header d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3">
     <h5 class="my-0 font-weight-normal title">
-        <img src="/static/images/icons/logo.jpg" alt="MessageCraft logo" width="30" height="30" class="me-2">
+        <img src="{% static 'images/icons/logo.jpg' %}" alt="MessageCraft logo" width="30" height="30" class="me-2">
         MessageCraft</h5>
     <button class="nav-toggle d-md-none ms-auto" onclick="toggleMenu()">☰</button>
 
