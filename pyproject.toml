@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "messagecraft"
 version = "0.1.0"
-description = "Study project for creating django web application"
+description = "Django web application for managing email newsletters, clients, users, and statistics"
 authors = ["Nadezhda_Popova <nadezhdapopova13@yandex.ru>"]
 readme = "README.md"
 
