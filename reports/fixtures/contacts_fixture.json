@@ -1,0 +1,11 @@
+[
+{
+    "model": "reports.contacts",
+    "pk": 1,
+    "fields": {
+        "country": "РФ",
+        "address": "101000 г. Москва, ул. Ленина, д. 10, офис 5",
+        "email": "support@messagecraft.com"
+    }
+}
+]

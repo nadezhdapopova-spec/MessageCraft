@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Форма карточки получателя рассылки{% endblock %}
+
+{% block content %}
+<section class="container mx-auto p-6">
+    <div class="pricing-header px-3 py-3 pt-md-4 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal mt-4 mb-2">Редактор получателей рассылки</h1>
+    </div>
+
+    <div class="col-lg-8 col-md-6 col-sm-12 mx-auto">
+        <div class="card shadow-sm border-0 rounded-3 edit-form">
+            <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                <h4 class="my-0 fw-semibold">Форма карточки получателя рассылки</h4>
+            </div>
+
+            <div class="card-body px-5 py-4">
+                {% if user.is_authenticated %}
+                    <form method="post" enctype="multipart/form-data" class="p-4 rounded shadow-sm bg-white">
+                        {% csrf_token %}
+                        {% include "includes/form_errors.html" %}
+
+                        {% if is_manager and not user.is_superuser%}
+                            <p class="text-center mt-4 text-warning">
+                                Модераторам запрещено создавать и редактировать статьи
+                            </p>
+                        {% elif not obj or user == obj.owner or user.is_superuser %}
+                            <div class="mb-3">
+                                <label class="form-label">Email получателя рассылки:</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ФИО получателя рассылки:</label>
+                                {{ form.full_name }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Комментарий:</label>
+                                {{ form.comment }}
+                                <div class="form-text">Необязательное поле</div>
+                            </div>
+                        {% else %}
+                            <p class="text-center mt-4 text-danger">
+                                Редактировать карточку получателя рассылки может только автор
+                            </p>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-center gap-3 mt-5 mb-3 text-center">
+                            <button type="submit" class="btn btn-success px-4">Сохранить</button>
+                            <a href="{% url 'clients:clients_list' %}" class="btn btn-secondary px-4 mx-3">Отмена</a>
+                        </div>
+                    </form>
+                {% else %}
+                    <p class="text-center mt-4">
+                        Чтобы создать или редактировать карточку получателя рассылки, <a href="{% url 'users:login' %}" class="text-blue-600">войдите в аккаунт</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

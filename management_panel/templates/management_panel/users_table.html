@@ -1,0 +1,62 @@
+{% extends "management_panel/base_management_panel.html" %}
+{% block title %}Управление пользователями{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4 text-success">👥 Управление пользователями</h2>
+
+<form method="post" action="{% url 'management_panel:block_users' %}">
+  {% csrf_token %}
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll"></th>
+            <th>Имя</th>
+            <th>Email</th>
+            <th>Активен</th>
+            <th>Роль</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td><input type="checkbox" name="selected_users" value="{{ user.id }}"></td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{% if user.is_active %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</td>
+            <td>
+              {% if user.is_superuser %}<span class="badge bg-danger">Суперпользователь</span>
+              {% elif user.is_staff %}<span class="badge bg-info">Администратор</span>
+              {% elif user.is_manager %}<span class="badge bg-warning">Менеджер</span>
+              {% else %}<span class="badge bg-secondary">Пользователь</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content gap-3 mt-2">
+      <button type="submit" formaction="{% url 'management_panel:block_users' %}" class="btn btn-danger mt-4">
+          🚫 Заблокировать выбранных
+      </button>
+      <button type="submit" formaction="{% url 'management_panel:unblock_users' %}" class="btn btn-success mt-4">
+          Разблокировать выбранных
+      </button>
+  </div>
+</form>
+
+{% if page_obj.has_other_pages %}
+    <div class="mt-auto">
+        {% include "includes/pagination.html" %}
+    </div>
+{% endif %}
+
+<script>
+  document.getElementById("selectAll").addEventListener("change", function() {
+    document.querySelectorAll("input[name='selected_users']").forEach(cb => cb.checked = this.checked);
+  });
+</script>
+{% endblock %}

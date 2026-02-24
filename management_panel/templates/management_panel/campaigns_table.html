@@ -1,0 +1,67 @@
+{% extends "management_panel/base_management_panel.html" %}
+{% block title %}Управление рассылками{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4 text-success">📢 Управление рассылками</h2>
+
+<form method="post" action="{% url 'management_panel:stop_campaigns' %}">
+  {% csrf_token %}
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll"></th>
+            <th>Название</th>
+            <th>Статус</th>
+            <th>Автор</th>
+            <th>Дата создания</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for campaign in campaigns %}
+          <tr>
+            <td><input type="checkbox" name="selected_campaigns" value="{{ campaign.id }}"></td>
+            <td>{{ campaign.name }}</td>
+            <td>
+              {% if campaign.status == "RUNNING" %}
+                <span class="badge bg-success">{{ campaign.get_status_display }}</span>
+              {% elif campaign.status == "DISABLED" %}
+                <span class="badge bg-secondary">{{ campaign.get_status_display }}</span>
+              {% elif campaign.status == "FINISHED" %}
+                <span class="badge bg-info">{{ campaign.get_status_display }}</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">{{ campaign.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td>{{ campaign.owner.username }}</td>
+            <td>{{ campaign.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content gap-3 mt-2">
+    <button type="submit" formaction="{% url 'management_panel:stop_campaigns' %}" class="btn btn-danger mt-4">
+      Остановить выбранные
+    </button>
+    <button type="submit" formaction="{% url 'management_panel:enable_campaigns' %}" class="btn btn-success mt-4">
+      Включить выбранные
+    </button>
+  </div>
+</form>
+
+{% if page_obj.has_other_pages %}
+    <div class="mt-auto">
+        {% include "includes/pagination.html" %}
+    </div>
+{% endif %}
+
+<script>
+  document.getElementById("selectAll").addEventListener("change", function() {
+    document.querySelectorAll("input[name='selected_campaigns']").forEach(cb => cb.checked = this.checked);
+  });
+</script>
+{% endblock %}

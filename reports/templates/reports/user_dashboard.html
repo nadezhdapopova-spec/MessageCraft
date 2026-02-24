@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Моя статистика{% endblock %}
+
+{% block content %}
+<div class="container py-3 mt-4">
+  <h3 class="text-center display-5 fw-normal mt-4 mb-3">Статистика в цифрах</h3>
+  <h3 class="text-center display-6 fw-normal mb-5">Мои рассылки</h3>
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+      <div class="stat-card glass-card text-center">
+        <h3 class="fw-bold text-success mb-2">{{ total_campaigns|default:"0" }}</h3>
+        <p class="text-muted mb-3">Всего рассылок</p>
+      </div>
+    </div>
+
+
+    <div class="col-md-4">
+      <div class="stat-card glass-card text-center">
+        <h3 class="fw-bold text-info mb-2">{{ active_campaigns|default:"0" }}</h3>
+        <p class="text-muted mb-3">Активных рассылок</p>
+      </div>
+    </div>
+
+
+    <div class="col-md-4">
+      <div class="stat-card glass-card text-center">
+        <h3 class="fw-bold text-warning mb-2">{{ unique_clients|default:"0" }}</h3>
+        <p class="text-muted mb-3">Уникальных получателей</p>
+      </div>
+    </div>
+  </div>
+
+
+  <h3 class="text-center display-6 fw-normal mt-5 mb-5">Попытки рассылки</h3>
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+      <div class="stat-card glass-card text-center">
+        <h4 class="fw-bold mb-2">{{ total_attempts|default:"0" }}</h4>
+        <p class="text-muted mb-3">Всего попыток</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card glass-card text-center">
+        <h4 class="fw-bold text-success mb-2">{{ successful_attempts|default:"0" }}</h4>
+        <p class="text-muted mb-3">Успешных</p>
+      </div>
+    </div>
+    <div class="col-md-4" id="stats">
+      <div class="stat-card glass-card text-center">
+        <h4 class="fw-bold text-danger mb-2">{{ failed_attempts|default:"0" }}</h4>
+        <p class="text-muted mb-3">Неуспешных</p>
+      </div>
+    </div>
+  </div>
+
+  {% include "reports/includes/grafics.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Редактор сообщения{% endblock %}
+
+{% block content %}
+    <section class="container-fluid px-5 py-4 bg-light">
+        <div class="pricing-header px-3 py-3 pt-md-4 pb-md-4 mx-auto text-center">
+            <h1 class="display-4 fw-normal mt-4 mb-2">Редактор сообщений</h1>
+            <p class="text-muted fs-5">Просмотр информации о письме</p>
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 p-4 mx-auto" style="max-width: 1200px;">
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title">Email: {{ mail.subject }}</h1>
+                <p class="card-text text-justify mt-4">{{ mail.body }}</p>
+            </div>
+
+            {% if user == mail.owner %}
+                <div class="d-flex justify-content-center gap-3 mt-2 mb-5 text-center">
+                    <a href="{% url 'mailings:mailing_preview' pk=mail.pk %}" class="btn-link btn-green mt-4">Предпросмотр</a>
+                    <a href="{% url 'mailings:mailing_update' pk=mail.pk %}" class="btn-link btn-blue mt-4">Редактировать</a>
+                    <a href="{% url 'mailings:mailing_delete' pk=mail.pk %}" class="btn-link btn-red mt-4">Удалить</a>
+                    <a href="{% url 'mailings:mailings_list' %}" class="btn-link btn-green mt-4">Назад</a>
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-center gap-3 mt-2 text-center ms-auto me-4">
+                    <a href="{% url 'mailings:mailings_list' %}" class="btn-link btn-green mt-4">Назад</a>
+                </div>
+            {% endif %}
+            <div class="product-updated text-end">
+                <small class="text-muted">Последнее обновление: {{ mail.updated_at|date:"j b Y G:i" }}</small>
+            </div>
+        </div>
+    </section>
+{% endblock %}
