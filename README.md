@@ -169,7 +169,7 @@
 ## Установка
 
    ```bash
-   git clone https://github.com/nadezhdapopova-spec/MessageCraft.git
+   git clone https://github.com/simbarilion/MessageCraft.git
    cd MessageCraft
    poetry install
    poetry shell
@@ -237,4 +237,4 @@ Python Developer
 
 📧 nadezhdapopova13@yandex.ru
 
-🔗 GitHub: nadezhdapopova-spec
+🔗 GitHub: simbarilion
