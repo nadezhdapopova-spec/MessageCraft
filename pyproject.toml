@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "messagecraft"
+package-mode = false
 version = "0.1.0"
 description = "Django web application for managing email newsletters, clients, users, and statistics"
 authors = ["Nadezhda_Popova <nadezhdapopova13@yandex.ru>"]
